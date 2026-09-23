@@ -3,18 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>__TITLE__｜yorozu-craft</title>
-  <meta name="description" content="__DESCRIPTION__">
+  <title>住宅ローン 返済シミュレーター｜yorozu-craft</title>
+  <meta name="description" content="変動金利の上昇と繰上返済を組み合わせて、毎月の返済額・総返済額・利息を試算。5年ルール・125%ルールにも対応。">
   <meta name="robots" content="index, follow">
-  <link rel="canonical" href="https://yorozu-craft.com/__REPO__/">
+  <link rel="canonical" href="https://yorozu-craft.com/loan-sim/">
 
-  <meta property="og:title" content="__TITLE__｜yorozu-craft">
-  <meta property="og:description" content="__DESCRIPTION__">
+  <meta property="og:title" content="住宅ローン 返済シミュレーター｜yorozu-craft">
+  <meta property="og:description" content="変動金利の上昇と繰上返済を組み合わせて、毎月の返済額・総返済額・利息を試算。5年ルール・125%ルールにも対応。">
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://yorozu-craft.com/__REPO__/">
+  <meta property="og:url" content="https://yorozu-craft.com/loan-sim/">
   <meta property="og:site_name" content="yorozu-craft">
   <meta property="og:locale" content="ja_JP">
-  <meta property="og:image" content="https://yorozu-craft.com/__REPO__/og-image.png">
+  <meta property="og:image" content="https://yorozu-craft.com/loan-sim/og-image.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
@@ -25,9 +25,9 @@
   {
     "@context": "https://schema.org",
     "@type": "WebApplication",
-    "name": "__TITLE__",
-    "description": "__DESCRIPTION__",
-    "url": "https://yorozu-craft.com/__REPO__/",
+    "name": "住宅ローン 返済シミュレーター",
+    "description": "変動金利の上昇と繰上返済を組み合わせて、毎月の返済額・総返済額・利息を試算。5年ルール・125%ルールにも対応。",
+    "url": "https://yorozu-craft.com/loan-sim/",
     "applicationCategory": "UtilitiesApplication",
     "operatingSystem": "All",
     "offers": { "@type": "Offer", "price": "0", "priceCurrency": "JPY" },
@@ -42,33 +42,193 @@
 
   <link rel="icon" href="./favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="./apple-touch-icon.png">
-  <!-- PWA-BEGIN -->
-  <link rel="manifest" href="./manifest.webmanifest">
-  <!-- PWA-END -->
   <link rel="stylesheet" href="./style.css">
 </head>
 <body>
 
   <header class="app-header">
-    <h1>__TITLE__</h1>
-    <p class="subtitle">__DESCRIPTION__</p>
+    <h1>住宅ローン 返済シミュレーター</h1>
+    <p class="subtitle">変動金利の上昇と繰上返済を組み合わせて、毎月の返済額・総返済額・利息を試算。5年ルール・125%ルールにも対応。</p>
   </header>
 
   <main class="app-main">
 
-    <!-- ここにツール本体を書く（例: 金額を 100 円単位で切り上げる） -->
-    <section class="card" aria-labelledby="tool-heading">
-      <h2 id="tool-heading">計算</h2>
-      <div class="field">
-        <label for="amount">金額</label>
-        <p class="hint">入力内容はこの端末のブラウザにだけ保存され、外部には送信されません。</p>
-        <input type="number" id="amount" inputmode="numeric" placeholder="例：1234">
+    <p class="badge" id="asof">一般的な返済ルールで計算（<span id="asof-date"></span>時点）・入力は外部に送信しません</p>
+
+    <!-- 1. 借入条件 -->
+    <section class="card" aria-labelledby="h-loan">
+      <h2 id="h-loan">借入条件</h2>
+      <fieldset class="field">
+        <legend>借入額の決め方</legend>
+        <label class="inline"><input type="radio" name="mode" value="purchase" checked> 物件価格・頭金・諸費用から</label>
+        <label class="inline"><input type="radio" name="mode" value="direct"> 借入額を直接入れる</label>
+      </fieldset>
+      <div id="purchase-fields">
+        <div class="grid2">
+          <div class="field">
+            <label for="price">物件価格（万円）</label>
+            <input type="number" id="price" inputmode="decimal" min="0" step="10">
+          </div>
+          <div class="field">
+            <label for="down">頭金（万円）</label>
+            <input type="number" id="down" inputmode="decimal" min="0" step="10">
+          </div>
+          <div class="field">
+            <label for="costs">諸費用</label>
+            <div class="with-unit">
+              <input type="number" id="costs" inputmode="decimal" min="0" step="0.1">
+              <select id="costs-unit" aria-label="諸費用の単位">
+                <option value="man">万円</option>
+                <option value="pct">%（物件価格に対して）</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <p class="calc-line">借入額 ＝ 物件価格 ＋ 諸費用 − 頭金 ＝ <strong id="loan-derived">—</strong></p>
       </div>
-      <p>結果：<strong id="result" aria-live="polite">—</strong></p>
-      <button type="button" id="share" class="btn">結果を開くリンクをコピー</button>
+      <div class="field" id="direct-fields" hidden>
+        <label for="loan">借入額（万円）</label>
+        <input type="number" id="loan" inputmode="decimal" min="0" step="10">
+      </div>
+      <div class="grid2">
+        <div class="field">
+          <label for="years">返済期間（年）</label>
+          <input type="number" id="years" inputmode="numeric" min="1" max="50" step="1">
+        </div>
+        <div class="field">
+          <label for="method">返済方式</label>
+          <p class="hint">元利均等は毎月の返済額が一定、元金均等は元金が一定</p>
+          <select id="method">
+            <option value="annuity">元利均等</option>
+            <option value="principal">元金均等</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="start">返済開始の年月</label>
+          <input type="month" id="start">
+        </div>
+      </div>
     </section>
 
-    <p class="small"><a href="./guide.html">使い方・よくある質問・ご利用上の注意</a></p>
+    <!-- 2. 金利 -->
+    <section class="card" aria-labelledby="h-rate">
+      <h2 id="h-rate">金利（変わる時期を行で足す）</h2>
+      <div class="field">
+        <label for="rate0">当初の金利（年 %）</label>
+        <input type="number" id="rate0" inputmode="decimal" min="0" max="20" step="0.01">
+      </div>
+      <div id="rate-rows" class="rows"></div>
+      <div class="btn-row">
+        <button type="button" class="btn btn-sub" id="add-rate">＋ 金利が変わる時期を足す</button>
+      </div>
+      <p class="small">上昇シナリオを一発で入れる（足した行は置き換わります）：</p>
+      <div class="btn-row" id="presets">
+        <button type="button" class="btn btn-sub" data-preset="yearly">毎年 +0.1%（10 年間）</button>
+        <button type="button" class="btn btn-sub" data-preset="y5">5 年後に +1%</button>
+        <button type="button" class="btn btn-sub" data-preset="y10">10 年後に +1%</button>
+        <button type="button" class="btn btn-sub" data-preset="clear">変わらない</button>
+      </div>
+      <fieldset class="field rules" id="rules">
+        <legend>変動金利の返済額のルール（元利均等のときだけ）</legend>
+        <label class="inline"><input type="checkbox" id="rule5"> 5 年ルール（返済額の見直しは 5 年ごと）</label>
+        <label class="inline"><input type="checkbox" id="rule125"> 125% ルール（見直し後は前回の 1.25 倍まで）</label>
+        <p class="small">採用している金融機関と、していない金融機関があります。ご自身の契約を確かめてください（<a href="./guide.html#rules">ルールの説明</a>）。</p>
+      </fieldset>
+    </section>
+
+    <!-- 3. 繰上返済 -->
+    <section class="card" aria-labelledby="h-pre">
+      <h2 id="h-pre">繰上返済（何回でも足せる）</h2>
+      <div id="pre-rows" class="rows"></div>
+      <div class="btn-row">
+        <button type="button" class="btn btn-sub" id="add-pre">＋ 繰上返済を足す</button>
+      </div>
+      <div class="field">
+        <label for="fee">繰上返済 1 回あたりの手数料（円）</label>
+        <input type="number" id="fee" inputmode="numeric" min="0" step="1000">
+      </div>
+    </section>
+
+    <!-- 4. 結果 -->
+    <section class="card result" aria-labelledby="h-result" aria-live="polite">
+      <h2 id="h-result">試算の結果</h2>
+      <div id="errors" class="msg msg-error" role="alert" hidden></div>
+      <div id="warnings" class="msg msg-warn" hidden></div>
+      <div id="summary">
+        <dl class="kpi">
+          <div><dt>毎月の返済額</dt><dd id="k-monthly">—</dd></div>
+          <div><dt>総返済額</dt><dd id="k-total">—</dd></div>
+          <div><dt>利息の総額</dt><dd id="k-interest">—</dd></div>
+          <div><dt>完済</dt><dd id="k-end">—</dd></div>
+        </dl>
+        <ul id="payment-changes" class="changes"></ul>
+      </div>
+    </section>
+
+    <!-- 5. 繰上返済の効果 -->
+    <section class="card" aria-labelledby="h-effect" id="effect" hidden>
+      <h2 id="h-effect">繰上返済の効果</h2>
+      <div class="table-wrap">
+        <table class="tbl">
+          <thead><tr><th scope="col"></th><th scope="col">なし</th><th scope="col">あり</th><th scope="col">差</th></tr></thead>
+          <tbody id="effect-body"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 6. グラフ・返済表 -->
+    <section class="card" aria-labelledby="h-detail">
+      <h2 id="h-detail">残高の推移と返済表</h2>
+      <div class="tabs" role="tablist" aria-label="表示の切り替え">
+        <button type="button" role="tab" id="tab-chart" aria-controls="panel-chart" aria-selected="true">グラフ</button>
+        <button type="button" role="tab" id="tab-table" aria-controls="panel-table" aria-selected="false" tabindex="-1">年ごとの返済表</button>
+      </div>
+      <div id="panel-chart" role="tabpanel" aria-labelledby="tab-chart">
+        <div id="chart" class="chart"></div>
+        <p class="legend"><span class="lg lg-a"></span>今の条件 <span class="lg lg-b" id="lg-b"></span><span id="lg-b-text">繰上返済なし</span></p>
+      </div>
+      <div id="panel-table" role="tabpanel" aria-labelledby="tab-table" hidden>
+        <div class="table-wrap">
+          <table class="tbl num">
+            <thead><tr><th scope="col">年</th><th scope="col">支払額</th><th scope="col">うち元金</th><th scope="col">うち利息</th><th scope="col">年末残高</th></tr></thead>
+            <tbody id="year-body"></tbody>
+          </table>
+        </div>
+        <p class="small">支払額・元金には繰上返済を含みます（円未満は四捨五入）。</p>
+      </div>
+      <div class="btn-row">
+        <button type="button" class="btn btn-sub" id="csv">毎月の返済表を CSV で保存</button>
+      </div>
+    </section>
+
+    <!-- 7. シナリオ比較 -->
+    <section class="card" aria-labelledby="h-scn">
+      <h2 id="h-scn">条件を保存して比べる</h2>
+      <div class="field">
+        <label for="scn-name">今の条件に名前を付けて保存（最大 10 件・この端末のブラウザにだけ保存）</label>
+        <div class="with-unit">
+          <input type="text" id="scn-name" maxlength="30" placeholder="例：期間短縮で 5 年ごとに 100 万円">
+          <button type="button" class="btn" id="scn-save">保存</button>
+        </div>
+      </div>
+      <p id="scn-msg" class="small" aria-live="polite"></p>
+      <ul id="scn-list" class="scn-list"></ul>
+      <div class="table-wrap" id="compare-wrap" hidden>
+        <table class="tbl num">
+          <thead id="compare-head"></thead>
+          <tbody id="compare-body"></tbody>
+        </table>
+      </div>
+      <div class="btn-row">
+        <button type="button" class="btn btn-sub" id="share">今の条件を開くリンクをコピー</button>
+      </div>
+      <p id="share-msg" class="small" aria-live="polite"></p>
+    </section>
+
+    <section class="card note">
+      <p>試算は目安です。金融機関の実際の返済額とは、端数の処理や金利を見直す時期などの違いで異なることがあります。借入や投資の助言ではありません。</p>
+      <p><a href="./guide.html">使い方・期間短縮と返済額軽減の違い・5 年ルールと 125% ルール・よくある質問</a></p>
+    </section>
 
   </main>
 
@@ -76,7 +236,7 @@
     <nav class="footer-nav" aria-label="フッターナビゲーション">
       <ul>
         <li><a href="../">yorozu-craft トップ</a></li>
-        <li><a href="./" aria-current="page">__TITLE__</a></li>
+        <li><a href="./" aria-current="page">住宅ローン 返済シミュレーター</a></li>
         <li><a href="./guide.html">使い方・よくある質問</a></li>
         <li><a href="../about.html">運営者情報</a></li>
         <li><a href="../privacy-policy.html">プライバシーポリシー</a></li>

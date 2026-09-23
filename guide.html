@@ -3,18 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>使い方・よくある質問｜__TITLE__｜yorozu-craft</title>
-  <meta name="description" content="__TITLE__の使い方、計算の根拠、よくある質問、ご利用上の注意。">
+  <title>繰上返済・5年ルール・125%ルールの解説と使い方｜住宅ローン 返済シミュレーター｜yorozu-craft</title>
+  <meta name="description" content="住宅ローンの繰上返済（期間短縮と返済額軽減の違い）、変動金利の5年ルール・125%ルール、未払利息のしくみと、シミュレーターの使い方・計算方法・よくある質問。">
   <meta name="robots" content="index, follow">
-  <link rel="canonical" href="https://yorozu-craft.com/__REPO__/guide.html">
+  <link rel="canonical" href="https://yorozu-craft.com/loan-sim/guide.html">
 
-  <meta property="og:title" content="使い方・よくある質問｜__TITLE__">
-  <meta property="og:description" content="__TITLE__の使い方、計算の根拠、よくある質問、ご利用上の注意。">
+  <meta property="og:title" content="繰上返済・5年ルール・125%ルールの解説と使い方｜住宅ローン 返済シミュレーター">
+  <meta property="og:description" content="住宅ローンの繰上返済（期間短縮と返済額軽減の違い）、変動金利の5年ルール・125%ルール、未払利息のしくみと、シミュレーターの使い方・計算方法・よくある質問。">
   <meta property="og:type" content="article">
-  <meta property="og:url" content="https://yorozu-craft.com/__REPO__/guide.html">
+  <meta property="og:url" content="https://yorozu-craft.com/loan-sim/guide.html">
   <meta property="og:site_name" content="yorozu-craft">
   <meta property="og:locale" content="ja_JP">
-  <meta property="og:image" content="https://yorozu-craft.com/__REPO__/og-image.png">
+  <meta property="og:image" content="https://yorozu-craft.com/loan-sim/og-image.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
@@ -27,13 +27,67 @@
     "mainEntity": [
       {
         "@type": "Question",
-        "name": "無料で使えますか？",
-        "acceptedAnswer": { "@type": "Answer", "text": "はい。会員登録やインストールも不要で、ブラウザだけで使えます。" }
+        "name": "期間短縮と返済額軽減は、どちらが得ですか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "同じ金額・同じ時期に繰上返済するなら、利息が減るのは期間短縮です。返済額軽減は毎月の負担が軽くなる代わりに、減る利息は小さくなります。教育費など今後の支出が多い時期は返済額軽減、完済を早めたいなら期間短縮と、目的で選びます。このツールで両方を保存して比べられます。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "繰上返済は早いほど効果がありますか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "はい。繰上返済したお金はすべて元金に充てられ、その元金にかかるはずだった利息が以後かからなくなります。早い時期ほど残りの期間が長いため、減る利息は大きくなります。ただし手元の資金を減らしすぎないようにしてください。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "5年ルール・125%ルールはどこの銀行にもありますか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "いいえ。元利均等返済の変動金利で採用している金融機関が多い一方、採用していない金融機関もあります。採用していない場合は、金利の見直しのたびに返済額が変わります。ご自身の契約内容（金銭消費貸借契約書など）で確かめてください。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "未払利息はどうなりますか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "金利が大きく上がり、利息が毎月の返済額を超えると、超えた分は支払いが先送りされ「未払利息」になります。このツールでは、最終回に残りの元金とあわせてまとめて支払う計算にしています（一般的な扱い）。実際の精算方法は金融機関によって異なります。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "変動金利が上がるシナリオはどう入れますか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "「金利が変わる時期を足す」で「◯年目◯か月目から◯%」の行を足すか、「毎年 +0.1%」「5 年後に +1%」などのボタンで一度に入れます。固定期間選択型で固定期間が終わった後の金利も、同じように行で表せます。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "銀行のシミュレーションと数円〜数百円ずれるのはなぜですか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "このツールは円未満を四捨五入して表示し、内部は小数のまま計算しています。金融機関は毎月の返済額や利息を円未満切り捨てにするなど、端数の処理が異なります。また金利を見直す月（年 2 回の基準日など）も金融機関ごとに違うため、少しずれることがあります。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "ボーナス返済や住宅ローン控除は計算できますか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "今はできません。ボーナス返済・借り換えの比較・住宅ローン控除は、今後の追加を検討しています。ご要望は下の「ご要望・不具合の報告」からお寄せください。"
+        }
       },
       {
         "@type": "Question",
         "name": "入力した内容はどこに保存されますか？",
-        "acceptedAnswer": { "@type": "Answer", "text": "お使いのブラウザの中にだけ保存され、外部のサーバーには送信されません。" }
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "お使いのブラウザの中にだけ保存され、外部のサーバーには送信されません。保存した条件はこの端末のブラウザでだけ読み込めます。"
+        }
       }
     ]
   }
@@ -51,40 +105,136 @@
 <body>
 
   <header class="app-header">
-    <h1>__TITLE__ の使い方</h1>
+    <h1>住宅ローン 返済シミュレーター の使い方</h1>
     <p class="subtitle">使い方・計算の根拠・よくある質問・ご利用上の注意</p>
   </header>
 
   <main class="app-main">
 
-    <p class="card" style="text-align:center"><a href="./">▶ __TITLE__ を使う</a></p>
+    <p class="card" style="text-align:center"><a href="./">▶ 住宅ローン 返済シミュレーターを使う</a></p>
+
+    <nav class="card content" aria-label="このページの目次">
+      <h2>目次</h2>
+      <ol>
+        <li><a href="#howto">使い方</a></li>
+        <li><a href="#prepay">期間短縮と返済額軽減の違い</a></li>
+        <li><a href="#method">元利均等と元金均等</a></li>
+        <li><a href="#rules">変動金利の 5 年ルール・125% ルール</a></li>
+        <li><a href="#unpaid">未払利息とは</a></li>
+        <li><a href="#calc">計算方法</a></li>
+        <li><a href="#basis">根拠と確認日</a></li>
+        <li><a href="#faq">よくある質問</a></li>
+        <li><a href="#notes">ご利用上の注意・データの扱い</a></li>
+        <li><a href="#changelog">更新履歴</a></li>
+      </ol>
+    </nav>
 
     <article class="card content" id="howto">
       <h2>使い方</h2>
       <ol>
-        <li>（手順を書く）</li>
+        <li><strong>借入条件</strong>：物件価格・頭金・諸費用から借入額を出すか、借入額を直接入れます。返済期間・返済方式・返済開始の年月を選びます。</li>
+        <li><strong>金利</strong>：当初の金利を入れ、上がる（下がる）時期を「◯年目◯か月目から◯%」の行で足します。「毎年 +0.1%」「5 年後に +1%」などのボタンで上昇シナリオを一度に入れることもできます。</li>
+        <li><strong>繰上返済</strong>：「◯年目◯か月目に◯万円、期間短縮／返済額軽減」の行を、何回でも足せます。手数料がかかる場合は 1 回あたりの金額を入れます。</li>
+        <li><strong>結果</strong>：毎月の返済額・総返済額・利息の総額・完済の年月が、入力するたびに自動で計算されます。繰上返済を入れると「なし」との差が出ます。</li>
+        <li><strong>比べる</strong>：名前を付けて保存し（最大 10 件）、チェックを入れた条件を今の条件と並べて比べられます。「リンクをコピー」で条件を人に送ることもできます。</li>
       </ol>
+      <p>残高の推移はグラフで、年ごとの支払額・元金・利息・年末残高は「年ごとの返済表」で確かめられます。毎月の返済表は CSV で保存して、表計算ソフトで開けます。</p>
     </article>
 
-    <!-- 制度・単価など時点のある値を使うツールだけ残す。値は constants.js、画面にも時点を出す -->
+    <article class="card content" id="prepay">
+      <h2>期間短縮と返済額軽減の違い</h2>
+      <p>繰上返済（ローンの一部を前倒しで返すこと）には 2 つの種類があります。どちらも繰上返済したお金は元金に充てられ、そのぶんの利息がかからなくなります。</p>
+      <h3>期間短縮型</h3>
+      <p>毎月の返済額はそのままで、返済期間を短くします。<strong>利息を減らす効果は期間短縮のほうが大きく</strong>、完済も早くなります。</p>
+      <h3>返済額軽減型</h3>
+      <p>返済期間はそのままで、毎月の返済額を下げます。完済の時期は変わりませんが、毎月の負担が軽くなります。子どもの教育費がかかる時期や、収入が減る見込みがあるときに向いています。</p>
+      <h3>例（3,000 万円・35 年・金利 1.0%・元利均等で、5 年目の終わりに 300 万円を繰上返済）</h3>
+      <div class="table-wrap">
+        <table class="tbl">
+          <thead><tr><th scope="col"></th><th scope="col">繰上返済なし</th><th scope="col">期間短縮</th><th scope="col">返済額軽減</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">毎月の返済額</th><td>84,686 円</td><td>84,686 円</td><td>75,037 円<br><small>（6 年目から）</small></td></tr>
+            <tr><th scope="row">返済期間</th><td>35 年</td><td>31 年 2 か月</td><td>35 年</td></tr>
+            <tr><th scope="row">利息の総額</th><td>556.8 万円</td><td>459.6 万円</td><td>509.4 万円</td></tr>
+            <tr><th scope="row">減る利息</th><td>—</td><td>97.2 万円</td><td>47.4 万円</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>同じ 300 万円でも、期間短縮のほうが利息は約 2 倍減ります。一方、返済額軽減は毎月の返済額が約 9,600 円下がります。ご自身の条件で入力し、2 つを保存して比べてみてください（このツールでの計算。端数の処理で金融機関の計算とは少し異なることがあります）。</p>
+    </article>
+
+    <article class="card content" id="method">
+      <h2>元利均等と元金均等</h2>
+      <ul>
+        <li><strong>元利均等返済</strong>：元金と利息を合わせた毎月の返済額が一定です（金利が変わらなければ）。はじめは利息の割合が大きく、元金はゆっくり減ります。多くの住宅ローンで選ばれている方式です。</li>
+        <li><strong>元金均等返済</strong>：毎月返す元金が一定で、利息は残高に応じて減っていきます。はじめの返済額は大きくなりますが、同じ条件なら利息の総額は元利均等より少なくなります。</li>
+      </ul>
+    </article>
+
+    <article class="card content" id="rules">
+      <h2>変動金利の 5 年ルール・125% ルール</h2>
+      <p>変動金利の住宅ローンでは、金利は半年ごとに見直されるのが一般的ですが、<strong>元利均等返済</strong>の場合、急に返済額が上がらないよう、次の 2 つのルールを設けている金融機関が多くあります。</p>
+      <h3>5 年ルール</h3>
+      <p>金利が変わっても、毎月の返済額は 5 年間変えないルールです。その間は、返済額のうち利息に回る分と元金に回る分の割合だけが変わります。金利が上がると元金の減りが遅くなります。</p>
+      <h3>125% ルール</h3>
+      <p>5 年ごとに返済額を見直すとき、新しい返済額を前回の 1.25 倍までに抑えるルールです。金利が下がって返済額が減るときは、そのまま減ります。</p>
+      <h3>注意点</h3>
+      <ul>
+        <li>ルールは返済額の上がり方をゆるやかにするだけで、<strong>利息が減るわけではありません</strong>。抑えられた分は、元金の返済が遅れる形で残ります。</li>
+        <li>採用していない金融機関もあります。採用していない場合、金利の見直しのたびに返済額が変わります。</li>
+        <li>元金均等返済では、金利の見直しのたびに返済額が変わるのが一般的です。このツールでも、元金均等を選ぶとルールの指定は使いません。</li>
+        <li>このツールでは、返済開始から 5 年ごと（61 か月目・121 か月目…）に返済額を見直す計算にしています。実際の見直しの時期は金融機関ごとに異なります。</li>
+      </ul>
+    </article>
+
+    <article class="card content" id="unpaid">
+      <h2>未払利息とは</h2>
+      <p>5 年ルール・125% ルールがあると、金利が大きく上がったときに、その月の利息が毎月の返済額を上回ることがあります。返済額で払いきれなかった利息は支払いが先送りされ、<strong>未払利息</strong>になります。未払利息があるあいだは元金がまったく減りません。</p>
+      <p>未払利息は、最終返済期日に残りの元金とあわせてまとめて支払うのが一般的です。このツールもその扱いで計算し、未払利息が出たときは警告と、最終回の支払額を表示します。精算の方法やタイミングは金融機関によって異なるため、心配な場合は借入先に確認してください。</p>
+    </article>
+
+    <article class="card content" id="calc">
+      <h2>計算方法</h2>
+      <ul>
+        <li>計算は月単位で、月利は年利 ÷ 12 です。</li>
+        <li>元利均等の毎月の返済額は <code>借入残高 × 月利 × (1＋月利)^回数 ÷ ((1＋月利)^回数 − 1)</code>。金利 0% のときは借入残高 ÷ 回数です。</li>
+        <li>元金均等は、毎月の元金が借入額 ÷ 回数で一定、利息はその月の残高 × 月利です。</li>
+        <li>金利が変わったとき：ルールを使わない場合は、その月の残高と残りの回数で返済額を計算し直します。5 年ルールを使う場合は 5 年ごとにだけ計算し直し、125% ルールを使う場合は前回の 1.25 倍までに抑えます。</li>
+        <li>繰上返済は、その月の返済のあとに元金へ充てます。期間短縮は返済額をそのままにして残りの回数を計算し直し（最後の回は端数）、返済額軽減は残りの回数をそのままにして返済額を計算し直します。</li>
+        <li>内部は小数のまま計算し、表示は円未満を四捨五入しています。金融機関ごとの端数の処理（切り捨てなど）とは異なるため、数円〜数百円ずれることがあります。</li>
+      </ul>
+    </article>
+
     <article class="card content" id="basis">
       <h2>根拠と確認日</h2>
+      <p>このツールは税制などの制度の値を使いません。5 年ルール・125% ルール・未払利息の扱いは、次の一般的な説明に合わせています。</p>
+      <ul id="sources"></ul>
       <dl class="info-list">
-        <dt>根拠</dt>
-        <dd>（法令・公式ページの名前）</dd>
         <dt>最終確認日</dt>
-        <dd><time datetime="__DATE__">__DATE_JA__</time></dd>
+        <dd><time datetime="" id="checked"></time></dd>
       </dl>
-      <p class="small">制度や単価は変わることがあります。最終確認日から時間がたっている場合は、公式ページで最新の情報をご確認ください。</p>
+      <p class="small">金融機関の商品や説明は変わることがあります。最終的な返済額や条件は、借入先の金融機関にご確認ください。</p>
     </article>
 
     <article class="card content" id="faq">
       <h2>よくある質問</h2>
       <dl class="faq">
-        <dt>無料で使えますか？</dt>
-        <dd>はい。会員登録やインストールも不要で、ブラウザだけで使えます。</dd>
+        <dt>期間短縮と返済額軽減は、どちらが得ですか？</dt>
+        <dd>同じ金額・同じ時期に繰上返済するなら、利息が減るのは期間短縮です。返済額軽減は毎月の負担が軽くなる代わりに、減る利息は小さくなります。教育費など今後の支出が多い時期は返済額軽減、完済を早めたいなら期間短縮と、目的で選びます。このツールで両方を保存して比べられます。</dd>
+        <dt>繰上返済は早いほど効果がありますか？</dt>
+        <dd>はい。繰上返済したお金はすべて元金に充てられ、その元金にかかるはずだった利息が以後かからなくなります。早い時期ほど残りの期間が長いため、減る利息は大きくなります。ただし手元の資金を減らしすぎないようにしてください。</dd>
+        <dt>5年ルール・125%ルールはどこの銀行にもありますか？</dt>
+        <dd>いいえ。元利均等返済の変動金利で採用している金融機関が多い一方、採用していない金融機関もあります。採用していない場合は、金利の見直しのたびに返済額が変わります。ご自身の契約内容（金銭消費貸借契約書など）で確かめてください。</dd>
+        <dt>未払利息はどうなりますか？</dt>
+        <dd>金利が大きく上がり、利息が毎月の返済額を超えると、超えた分は支払いが先送りされ「未払利息」になります。このツールでは、最終回に残りの元金とあわせてまとめて支払う計算にしています（一般的な扱い）。実際の精算方法は金融機関によって異なります。</dd>
+        <dt>変動金利が上がるシナリオはどう入れますか？</dt>
+        <dd>「金利が変わる時期を足す」で「◯年目◯か月目から◯%」の行を足すか、「毎年 +0.1%」「5 年後に +1%」などのボタンで一度に入れます。固定期間選択型で固定期間が終わった後の金利も、同じように行で表せます。</dd>
+        <dt>銀行のシミュレーションと数円〜数百円ずれるのはなぜですか？</dt>
+        <dd>このツールは円未満を四捨五入して表示し、内部は小数のまま計算しています。金融機関は毎月の返済額や利息を円未満切り捨てにするなど、端数の処理が異なります。また金利を見直す月（年 2 回の基準日など）も金融機関ごとに違うため、少しずれることがあります。</dd>
+        <dt>ボーナス返済や住宅ローン控除は計算できますか？</dt>
+        <dd>今はできません。ボーナス返済・借り換えの比較・住宅ローン控除は、今後の追加を検討しています。ご要望は下の「ご要望・不具合の報告」からお寄せください。</dd>
         <dt>入力した内容はどこに保存されますか？</dt>
-        <dd>お使いのブラウザの中にだけ保存され、外部のサーバーには送信されません。</dd>
+        <dd>お使いのブラウザの中にだけ保存され、外部のサーバーには送信されません。保存した条件はこの端末のブラウザでだけ読み込めます。</dd>
       </dl>
     </article>
 
@@ -92,17 +242,19 @@
     <article class="card content" id="notes">
       <h2>ご利用上の注意・データの扱い</h2>
       <ul>
-        <li><strong>保存されるデータ</strong>：（何をブラウザに保存するか。保存しないならそう書く）</li>
-        <li><strong>共有リンク</strong>：（共有機能があれば、リンクに何が含まれるか。URL の「#」以降に入るのでサーバーには送信されない）</li>
-        <li><strong>結果の扱い</strong>：（計算結果は目安であること、最終的な確認先など）</li>
+        <li><strong>結果の扱い</strong>：試算は目安です。金融機関の実際の返済額とは、端数の処理や金利を見直す時期などの違いで異なることがあります。借入や投資の助言ではありません。借入の判断は、金融機関の説明と契約内容に基づいて行ってください。</li>
+        <li><strong>保存されるデータ</strong>：入力中の条件と、名前を付けて保存した条件（最大 10 件）を、お使いのブラウザにだけ保存します。外部のサーバーには送信しません。</li>
+        <li><strong>共有リンク</strong>：「リンクをコピー」で作るリンクには、入力した条件が含まれます。条件は URL の「#」以降に入っているため、リンクを開いても当サイトのサーバーには送信されません。リンクを渡した相手には条件が見えます。</li>
+        <li><strong>CSV</strong>：返済表の CSV は、お使いの端末の中で作って保存します。</li>
       </ul>
+      <p><a href="https://docs.google.com/forms/d/e/1FAIpQLSd8B90qh5lEIyr25iw1jOjdQjOyaPZ1_z2wMB4kH-EmEeJYWw/viewform?usp=pp_url&amp;entry.585564634=loan-sim" rel="noopener" target="_blank">ご要望・不具合の報告（Google フォーム）</a>：いただいた内容をもとに直します。お返事はしていません。</p>
       <p>サイト全体の運営者情報・免責事項は<a href="../about.html">こちら</a>、プライバシーポリシーは<a href="../privacy-policy.html">こちら</a>です（すべてのツールで共通）。</p>
     </article>
 
     <article class="card content" id="changelog">
       <h2>更新履歴</h2>
       <ul>
-        <li><time datetime="__DATE__">__DATE_JA__</time> 公開</li>
+        <li><time datetime="2026-09-23">2026年9月23日</time> 公開</li>
       </ul>
     </article>
 
@@ -112,7 +264,7 @@
     <nav class="footer-nav" aria-label="フッターナビゲーション">
       <ul>
         <li><a href="../">yorozu-craft トップ</a></li>
-        <li><a href="./">__TITLE__</a></li>
+        <li><a href="./">住宅ローン 返済シミュレーター</a></li>
         <li><a href="./guide.html" aria-current="page">使い方・よくある質問</a></li>
         <li><a href="../about.html">運営者情報</a></li>
         <li><a href="../privacy-policy.html">プライバシーポリシー</a></li>
@@ -121,6 +273,21 @@
     <p>&copy; 2026 yorozu-craft. All rights reserved.</p>
   </footer>
 
+  <script src="./constants.js"></script>
+  <script>
+    // 根拠の一覧と確認日は constants.js（画面と同じもの）から出す
+    (function () {
+      var K = window.Constants, ul = document.getElementById('sources');
+      K.SOURCES.forEach(function (x) {
+        var li = document.createElement('li'), a = document.createElement('a');
+        a.href = x.url; a.rel = 'noopener'; a.target = '_blank'; a.textContent = x.publisher + '「' + x.label + '」';
+        li.appendChild(a); li.appendChild(document.createTextNode('：' + x.note));
+        ul.appendChild(li);
+      });
+      var d = K.CHECKED.split('-'), t = document.getElementById('checked');
+      t.dateTime = K.CHECKED; t.textContent = d[0] + '年' + (+d[1]) + '月' + (+d[2]) + '日';
+    })();
+  </script>
   <!-- Cloudflare Web Analytics（Cookie を使わないアクセス解析） --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "b79bf821e1fd4b6683866d493b1de426"}'></script><!-- End Cloudflare Web Analytics -->
 </body>
 </html>
