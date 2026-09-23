@@ -1,62 +1,38 @@
-# __TITLE__
+# 住宅ローン 返済シミュレーター
 
-公開 URL: **https://yorozu-craft.com/__REPO__/**
+公開 URL: **https://yorozu-craft.com/loan-sim/**
 
-__DESCRIPTION__
+変動金利の上昇と繰上返済を組み合わせて、毎月の返済額・総返済額・利息を試算。5年ルール・125%ルールにも対応。
 yorozu-craft のツールの1つです（共通ルールは [youheioonuki.github.io の README](https://github.com/YouheiOonuki/youheioonuki.github.io) を参照）。
-
-<!-- TEMPLATE-BEGIN -->
-## テンプレートの使い方（`tools/init.mjs` を実行すると、この節は消えます）
-
-yorozu-craft の新しいツールの雛形です。サイト共通の決まり（youheioonuki.github.io の README「ツールを追加するとき」）のうち、ファイルで守れるものは最初から入れてあります。
-
-1. GitHub で「Use this template」→ リポジトリ名は短いローマ字＋種類（例: `loan-sim`）。URL になる
-2. クローンして、初期化スクリプトを 1 回だけ実行する（Node 20 以上）
-
-   ```sh
-   node tools/init.mjs loan-sim "住宅ローン 返済シミュレーター" "毎月の返済額と総返済額をすぐ計算。" --pwa
-   ```
-
-   - `__REPO__`・`__TITLE__`・`__DESCRIPTION__`・日付を置き換える
-   - `--pwa` を付けないと、オフライン対応の部分（`sw.js`・`manifest.webmanifest`・`PWA-BEGIN`〜`PWA-END`）を消す
-   - README のこの節と `tools/init.mjs` 自身を消す
-3. `node --test tests/*.test.js` が通ることを確かめてからコミット
-4. 残りは youheioonuki.github.io の README「ツールを追加するとき」の手順どおり（Pages の公開と Enforce HTTPS、トップの一覧・robots.txt・URL 表への追加など）
-
-最初から入っているもの:
-
-| 決まり | 入っている場所 |
-|-------|---------------|
-| canonical・OGP・AdSense・Cloudflare ビーコン | `index.html`・`guide.html` の `<head>` と `</body>` 直前 |
-| 共通ページへの相対リンク（`../about.html`・`../privacy-policy.html`） | 各ページのフッター |
-| ツール配下の 404 | `404.html`（youheioonuki.github.io のものと同じ） |
-| 保存キーの接頭辞 `<リポジトリ名>_`・try/catch | `main.js` の `store` |
-| 共有 URL は `#s=` | `main.js` の `toShareHash` / `fromShareHash` |
-| SW のキャッシュ名の接頭辞・自分のパスだけ扱う・`./sw.js` で登録 | `sw.js`・`main.js` |
-| manifest の `id` は `/<リポジトリ名>/` | `manifest.webmanifest` |
-| 使い方ページは `guide.html`（注意・データの扱い・根拠と確認日・更新履歴の節つき） | `guide.html` |
-| 時点のある値は値・出典・確認日をセットで 1 か所に | `constants.js`（テストで出典と確認日の書き忘れを検出） |
-| 計算は画面から切り離した純粋関数＋テスト | `calc.js`・`tests/`・`.github/workflows/test.yml` |
-| 端末のフォント・ダークモード | `style.css` |
-| MIT ライセンス | `LICENSE` |
-
-差し替えが必要なもの: `favicon.svg`・`apple-touch-icon.png`（180×180）・`og-image.png`（1200×630）は仮の絵なので、ツールに合わせて作り直す。
-<!-- TEMPLATE-END -->
 
 ## 機能
 
-- （できることを箇条書きで）
-- 入力内容はこの端末のブラウザにだけ保存し、外部には送信しない
+- 物件価格・頭金・諸費用から借入額を計算（借入額を直接入れることもできる）
+- 元利均等／元金均等、返済期間、返済開始の年月
+- 金利の変更を「◯年目◯か月目から◯%」の行で何回でも足せる。上昇シナリオのボタン（毎年 +0.1%、5 年後に +1%、10 年後に +1%）
+- 変動金利の 5 年ルール・125% ルールの ON/OFF（元利均等のみ）。未払利息が出たら警告し、最終回に精算
+- 繰上返済（期間短縮／返済額軽減）を何回でも足せる。1 回あたりの手数料
+- 結果：毎月の返済額と推移、総返済額、利息の総額、完済年月。繰上返済なしとの比較
+- 残高の推移グラフ（SVG・ライブラリなし）、年ごとの返済表、毎月の返済表の CSV
+- 条件を名前を付けて保存（最大 10 件、localStorage の `loan-sim_scenarios`）し、並べて比較
+- 条件を `#s=` の共有リンクにする（サーバーには送信されない）
+- 入力中の条件はブラウザに自動保存（`loan-sim_draft`）
 
 ## 計算の仕様・根拠
 
-（計算式、使っている値と出典。値は `constants.js` にまとめ、画面の「根拠と確認日」にも出す）
+- 月単位、月利 = 年利 ÷ 12。元利均等 `P·r(1+r)^n / ((1+r)^n − 1)`（金利 0% は `P/n`）、元金均等は元金 `P/n` 一定
+- 金利変更：ルール OFF は変更月に残高と残り回数で再計算。5 年ルールは返済開始から 60 か月ごと（61・121…か月目）にだけ再計算。125% ルールは再計算後の返済額を前回の 1.25 倍までに抑え、利息が返済額を超えた分は未払利息として積み、最終回に元金とあわせて精算
+- 繰上返済はその月の返済のあとに元金へ充当。期間短縮は返済額据え置きで残り回数を再計算（最後の回は端数）、返済額軽減は残り回数据え置きで返済額を再計算。残高を超える金額はエラー
+- 内部は小数、表示は円未満四捨五入（金融機関の端数処理とは異なる旨を画面と解説に記載）
+- 税制などの制度の値は使わない。ルールの一般的な説明の出典と確認日は `constants.js` の `SOURCES`・`CHECKED`（使い方ページの「根拠と確認日」に表示）
+- 企画書（受け入れテストを含む）は yorozu-plans（非公開）の `docs/01_住宅ローン.md`。受け入れテストは `tests/calc.test.js`
 
 ## 保守
 
 | 時期 | 確認すること | 直す場所 |
 |------|------------|---------|
-| （例: 毎年4月ごろ） | （例: 料率の改定） | `constants.js`、`guide.html` の最終確認日 |
+| 年 1 回（画面に注意が出る前。`STALE_MONTHS` = 12 か月） | 出典のページがあるか、5 年ルール・125% ルール・未払利息の一般的な説明が変わっていないか | `constants.js` の `SOURCES`・`CHECKED` |
+| 住宅ローン控除などフェーズ 2 を足すとき | 制度の値（入居年×住宅区分）と出典 | `constants.js` に表として追加 |
 
 値や計算を直したら、`guide.html` の「更新履歴」に日付と内容を 1 行足す。
 
@@ -64,17 +40,16 @@ yorozu-craft の新しいツールの雛形です。サイト共通の決まり�
 
 | ファイル | 役割 |
 |---------|------|
-| `index.html` | ツール本体 |
-| `guide.html` | 使い方・根拠と確認日・よくある質問・ご利用上の注意・更新履歴 |
+| `index.html` | シミュレーター本体 |
+| `guide.html` | 使い方・期間短縮と返済額軽減・5 年ルールと 125% ルール・未払利息・計算方法・根拠と確認日・よくある質問・ご利用上の注意・更新履歴 |
 | `calc.js` | 計算ロジック（画面から切り離した純粋関数） |
-| `constants.js` | 時点のある値（値・出典・確認日） |
-| `main.js` | 画面の制御・保存・共有リンク |
+| `constants.js` | 出典と確認日 |
+| `main.js` | 画面の制御・保存・共有リンク・グラフ・比較 |
 | `style.css` | 見た目（和紙風の配色、ダークモード対応） |
-| `sw.js` / `manifest.webmanifest` | オフライン対応（使う場合のみ） |
 | `404.html` | ツール配下の存在しない URL で出るページ（サイト共通のもの） |
 | `favicon.svg` / `apple-touch-icon.png` / `og-image.png` | アイコン / ホーム画面用アイコン / SNS 共有用画像（1200×630） |
 | `sitemap.xml` | サイトマップ（robots.txt はドメイン直下で管理） |
-| `tests/*.test.js` | テスト（`node --test tests/*.test.js`。`.github/workflows/test.yml` で push・PR のたびに自動実行） |
+| `tests/calc.test.js` | 計算のテスト（`node --test tests/*.test.js`。`.github/workflows/test.yml` で push・PR のたびに自動実行） |
 
 ## ライセンス
 
