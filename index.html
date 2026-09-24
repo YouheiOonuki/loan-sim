@@ -51,13 +51,18 @@
     <p class="subtitle">変動金利の上昇と繰上返済を組み合わせて、毎月の返済額・総返済額・利息を試算。5年ルール・125%ルールにも対応。</p>
   </header>
 
-  <main class="app-main">
+  <!-- 固定バー（SCREEN.md 1.1・D59）: 結果が出たあと、結果が画面の外にあるときだけ上端に出す。読み込み時は無い（CLS を出さない） -->
+  <div class="fixbar fixbar-narrow" id="fixbar" role="status" hidden>
+    <a href="#result-card" id="fixbar-link"><span id="fixbar-text"></span> ▸ 結果へ</a>
+  </div>
+
+  <main class="app-main layout-2col">
 
     <p class="badge" id="asof">一般的な返済ルールで計算（<span id="asof-date"></span>時点）・入力は外部に送信しません</p>
 
-    <!-- 1. 借入条件 -->
-    <section class="card" aria-labelledby="h-loan">
-      <h2 id="h-loan">借入条件</h2>
+    <!-- 1. 借入条件（必須の入力。SCREEN.md 1.1 の 2）。一部の人だけの入力は結果の後ろの「くわしく入れる」へ -->
+    <fieldset class="card req" id="req">
+      <legend>借入条件</legend>
       <fieldset class="field">
         <legend>借入額の決め方</legend>
         <label class="inline"><input type="radio" name="mode" value="purchase" checked> 物件価格・頭金・諸費用から</label>
@@ -73,16 +78,6 @@
             <label for="down">頭金（万円）</label>
             <input type="number" id="down" inputmode="decimal" min="0" step="10">
           </div>
-          <div class="field">
-            <label for="costs">諸費用</label>
-            <div class="with-unit">
-              <input type="number" id="costs" inputmode="decimal" min="0" step="0.1">
-              <select id="costs-unit" aria-label="諸費用の単位">
-                <option value="man">万円</option>
-                <option value="pct">%（物件価格に対して）</option>
-              </select>
-            </div>
-          </div>
         </div>
         <p class="calc-line">借入額 ＝ 物件価格 ＋ 諸費用 − 頭金 ＝ <strong id="loan-derived">—</strong></p>
       </div>
@@ -96,66 +91,19 @@
           <input type="number" id="years" inputmode="numeric" min="1" max="50" step="1">
         </div>
         <div class="field">
-          <label for="method">返済方式</label>
-          <p class="hint">元利均等は毎月の返済額が一定、元金均等は元金が一定</p>
-          <select id="method">
-            <option value="annuity">元利均等</option>
-            <option value="principal">元金均等</option>
-          </select>
-        </div>
-        <div class="field">
-          <label for="start">返済開始の年月</label>
-          <input type="month" id="start">
+          <label for="rate0">当初の金利（年 %）</label>
+          <input type="number" id="rate0" inputmode="decimal" min="0" max="20" step="0.01">
         </div>
       </div>
-    </section>
-
-    <!-- 2. 金利 -->
-    <section class="card" aria-labelledby="h-rate">
-      <h2 id="h-rate">金利（変わる時期を行で足す）</h2>
-      <div class="field">
-        <label for="rate0">当初の金利（年 %）</label>
-        <input type="number" id="rate0" inputmode="decimal" min="0" max="20" step="0.01">
-      </div>
-      <div id="rate-rows" class="rows"></div>
-      <div class="btn-row">
-        <button type="button" class="btn btn-sub" id="add-rate">＋ 金利が変わる時期を足す</button>
-      </div>
-      <p class="small">上昇シナリオを一発で入れる（足した行は置き換わります）：</p>
-      <div class="btn-row" id="presets">
-        <button type="button" class="btn btn-sub" data-preset="yearly">毎年 +0.1%（10 年間）</button>
-        <button type="button" class="btn btn-sub" data-preset="y5">5 年後に +1%</button>
-        <button type="button" class="btn btn-sub" data-preset="y10">10 年後に +1%</button>
-        <button type="button" class="btn btn-sub" data-preset="clear">変わらない</button>
-      </div>
-      <fieldset class="field rules" id="rules">
-        <legend>変動金利の返済額のルール（元利均等のときだけ）</legend>
-        <label class="inline"><input type="checkbox" id="rule5"> 5 年ルール（返済額の見直しは 5 年ごと）</label>
-        <label class="inline"><input type="checkbox" id="rule125"> 125% ルール（見直し後は前回の 1.25 倍まで）</label>
-        <p class="small">採用している金融機関と、していない金融機関があります。ご自身の契約を確かめてください（<a href="./guide.html#rules">ルールの説明</a>）。</p>
-      </fieldset>
-    </section>
-
-    <!-- 3. 繰上返済 -->
-    <section class="card" aria-labelledby="h-pre">
-      <h2 id="h-pre">繰上返済（何回でも足せる）</h2>
-      <div id="pre-rows" class="rows"></div>
-      <div class="btn-row">
-        <button type="button" class="btn btn-sub" id="add-pre">＋ 繰上返済を足す</button>
-      </div>
-      <div class="field">
-        <label for="fee">繰上返済 1 回あたりの手数料（円）</label>
-        <input type="number" id="fee" inputmode="numeric" min="0" step="1000">
-      </div>
-    </section>
+    </fieldset>
 
     <!-- 4. 結果 -->
-    <section class="card result" aria-labelledby="h-result" aria-live="polite">
+    <section class="card result result-card" aria-labelledby="h-result" aria-live="polite" id="result-card" tabindex="-1">
       <h2 id="h-result">試算の結果</h2>
       <div id="errors" class="msg msg-error" role="alert" hidden></div>
       <div id="warnings" class="msg msg-warn" hidden></div>
       <div id="summary">
-        <dl class="kpi">
+        <dl class="kpi" id="result-main">
           <div><dt>毎月の返済額</dt><dd id="k-monthly">—</dd></div>
           <div><dt>総返済額</dt><dd id="k-total">—</dd></div>
           <div><dt>利息の総額</dt><dd id="k-interest">—</dd></div>
@@ -165,6 +113,77 @@
         <p class="small" id="to-nenmatsu">年末調整でローン控除を計算に入れるなら → <a href="../seido-keisan/nenmatsu/">年末調整の計算（控除証明書の金額を入力）</a></p>
       </div>
     </section>
+
+    <!-- くわしく入れる（SCREEN.md 1.1 の 4）。summary に今の状態を出す。開いた状態は保存しない -->
+    <div class="opts" id="opts">
+      <details class="card opt" id="opt-costs">
+        <summary>諸費用: <span class="opt-state" id="sum-costs"></span></summary>
+        <div class="field">
+          <label for="costs">諸費用</label>
+          <div class="with-unit">
+            <input type="number" id="costs" inputmode="decimal" min="0" step="0.1">
+            <select id="costs-unit" aria-label="諸費用の単位">
+              <option value="man">万円</option>
+              <option value="pct">%（物件価格に対して）</option>
+            </select>
+          </div>
+        </div>
+      </details>
+
+      <details class="card opt" id="opt-method">
+        <summary>返済方式・返済開始の年月: <span class="opt-state" id="sum-method"></span></summary>
+        <div class="grid2">
+          <div class="field">
+            <label for="method">返済方式</label>
+            <p class="hint">元利均等は毎月の返済額が一定、元金均等は元金が一定</p>
+            <select id="method">
+              <option value="annuity">元利均等</option>
+              <option value="principal">元金均等</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="start">返済開始の年月</label>
+            <input type="month" id="start">
+          </div>
+        </div>
+      </details>
+
+      <details class="card opt" id="opt-rate">
+        <summary>金利（変わる時期を行で足す）: <span class="opt-state" id="sum-rate">変わらない</span></summary>
+        <div id="rate-rows" class="rows"></div>
+        <div class="btn-row">
+          <button type="button" class="btn btn-sub" id="add-rate">＋ 金利が変わる時期を足す</button>
+        </div>
+        <p class="small">上昇シナリオを一発で入れる（足した行は置き換わります）：</p>
+        <div class="btn-row" id="presets">
+          <button type="button" class="btn btn-sub" data-preset="yearly">毎年 +0.1%（10 年間）</button>
+          <button type="button" class="btn btn-sub" data-preset="y5">5 年後に +1%</button>
+          <button type="button" class="btn btn-sub" data-preset="y10">10 年後に +1%</button>
+          <button type="button" class="btn btn-sub" data-preset="clear">変わらない</button>
+        </div>
+      </details>
+
+      <details class="card opt" id="opt-rules">
+        <summary>変動金利の返済額のルール（元利均等のときだけ）: <span class="opt-state" id="sum-rules"></span></summary>
+        <fieldset class="field rules" id="rules">
+          <label class="inline"><input type="checkbox" id="rule5"> 5 年ルール（返済額の見直しは 5 年ごと）</label>
+          <label class="inline"><input type="checkbox" id="rule125"> 125% ルール（見直し後は前回の 1.25 倍まで）</label>
+          <p class="small">採用している金融機関と、していない金融機関があります。ご自身の契約を確かめてください（<a href="./guide.html#rules">ルールの説明</a>）。</p>
+        </fieldset>
+      </details>
+
+      <details class="card opt" id="opt-pre">
+        <summary>繰上返済（何回でも足せる）: <span class="opt-state" id="sum-pre">なし</span></summary>
+        <div id="pre-rows" class="rows"></div>
+        <div class="btn-row">
+          <button type="button" class="btn btn-sub" id="add-pre">＋ 繰上返済を足す</button>
+        </div>
+        <div class="field">
+          <label for="fee">繰上返済 1 回あたりの手数料（円）</label>
+          <input type="number" id="fee" inputmode="numeric" min="0" step="1000">
+        </div>
+      </details>
+    </div>
 
     <!-- 5. 繰上返済の効果 -->
     <section class="card" aria-labelledby="h-effect" id="effect" hidden>
@@ -203,8 +222,8 @@
     </section>
 
     <!-- 7. シナリオ比較 -->
-    <section class="card" aria-labelledby="h-scn">
-      <h2 id="h-scn">条件を保存して比べる</h2>
+    <details class="card opt no-print" id="scn-box">
+      <summary>条件を保存して比べる</summary>
       <div class="field">
         <label for="scn-name">今の条件に名前を付けて保存（最大 10 件・この端末のブラウザにだけ保存）</label>
         <div class="with-unit">
@@ -227,7 +246,7 @@
         <input type="file" id="backup-file" accept=".json,application/json" hidden>
       </div>
       <p id="share-msg" class="small" aria-live="polite"></p>
-    </section>
+    </details>
 
     <section class="card note">
       <p>この計算は目安です。実際の返済額は借入先の金融機関が決めます。借入や投資の助言ではありません。</p>
@@ -251,6 +270,7 @@
 
   <script src="./constants.js"></script>
   <script src="./calc.js"></script>
+  <script src="./screen.js"></script>
   <script src="./main.js"></script>
   <!-- Cloudflare Web Analytics（Cookie を使わないアクセス解析） --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "b79bf821e1fd4b6683866d493b1de426"}'></script><!-- End Cloudflare Web Analytics -->
 </body>

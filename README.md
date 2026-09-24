@@ -45,6 +45,7 @@ yorozu-craft のツールの1つです（共通ルールは [youheioonuki.github
 | `calc.js` | 計算ロジック（画面から切り離した純粋関数） |
 | `constants.js` | 出典と確認日 |
 | `main.js` | 画面の制御・保存・共有リンク・グラフ・比較 |
+| `screen.js` | 画面の骨組み（yorozu-plans の SCREEN.md 1.1）の共通部品: 「くわしく入れる」の summary の更新と上端の固定バー（seido-keisan の `lib/screen.js` と同じ中身） |
 | `style.css` | 見た目（和紙風の配色、ダークモード対応） |
 | `404.html` | ツール配下の存在しない URL で出るページ（サイト共通のもの） |
 | `favicon.svg` / `apple-touch-icon.png` / `og-image.png` | アイコン / ホーム画面用アイコン / SNS 共有用画像（1200×630） |

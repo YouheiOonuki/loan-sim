@@ -125,6 +125,7 @@
     $('rule5').disabled = dis;
     $('rule125').disabled = dis;
     $('rules').classList.toggle('is-disabled', dis);
+    $('opt-costs').hidden = state.mode !== 'purchase';
   }
 
   simple.forEach(function (k) {
@@ -265,6 +266,7 @@
   var last = null;   // 直近の結果（CSV 用）
   function update() {
     if (!fromShare) store.set('draft', state);
+    updateSummaries();
     var P = principalOf(state);
     $('loan-derived').textContent = man(P);
 
@@ -284,7 +286,7 @@
     $('errors').innerHTML = errs.map(function (x) { return '<p>' + esc(x) + '</p>'; }).join('');
     $('summary').classList.toggle('is-stale', errs.length > 0);
     $('to-nenmatsu').hidden = errs.length > 0;
-    if (errs.length) return;
+    if (errs.length) { setBar(''); return; }
 
     $('warnings').hidden = !withPre.warnings.length;
     $('warnings').innerHTML = withPre.warnings.map(function (w) { return '<p>' + esc(w.text) + (w.type === 'unpaid' ? ' <a href="./guide.html#unpaid">未払利息とは</a>' : '') + '</p>'; }).join('');
@@ -295,6 +297,8 @@
     $('k-total').textContent = man(withPre.totalPaid);
     $('k-interest').textContent = man(withPre.totalInterest);
     $('k-end').textContent = ymLabel(withPre.months) + '（' + termLabel(withPre.months) + '）';
+    // 固定バーの文言は「毎月の返済額」とその数字
+    setBar('毎月の返済額 ' + $('k-monthly').textContent);
 
     var ch = $('payment-changes');
     ch.textContent = '';
@@ -316,6 +320,24 @@
     renderYearTable(withPre);
     renderCompare();
   }
+
+  // --- 「くわしく入れる」の summary（SCREEN.md 1.1 の 4）に今の状態を出す ---
+  var setText = window.ScreenParts.setText, optText = window.ScreenParts.optText;
+  function updateSummaries() {
+    setText('sum-costs', num(state.costs).toLocaleString('ja-JP') + ' ' + optText($('costs-unit')));
+    var s = startYM();
+    setText('sum-method', optText($('method')) + '・' + s.y + '年' + s.m + '月');
+    setText('sum-rate', state.rates.length ? state.rates.length + ' 回変わる' : '変わらない');
+    var rules = [];
+    if (state.rule5) rules.push('5 年ルール');
+    if (state.rule125) rules.push('125% ルール');
+    setText('sum-rules', rules.length ? rules.join('・') : 'なし');
+    setText('sum-pre', state.prepays.length ? state.prepays.length + ' 回' : 'なし');
+  }
+
+  // --- 固定バー（SCREEN.md 1.1・D59）: 結果が画面の外にあるときだけ上端に出す（screen.js）。
+  // 読み込み時から既定の条件で結果が出ているので、スクロールか入力をするまでは出さない
+  var setBar = window.ScreenParts.fixbar({ waitForUser: true });
 
   function esc(s) {
     return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; });
