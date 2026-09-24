@@ -283,6 +283,7 @@
     $('errors').hidden = !errs.length;
     $('errors').innerHTML = errs.map(function (x) { return '<p>' + esc(x) + '</p>'; }).join('');
     $('summary').classList.toggle('is-stale', errs.length > 0);
+    $('to-nenmatsu').hidden = errs.length > 0;
     if (errs.length) return;
 
     $('warnings').hidden = !withPre.warnings.length;
