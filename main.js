@@ -503,6 +503,40 @@
     else $('share-msg').textContent = 'アドレスバーのリンクをコピーしてください。';
   });
 
+  // --- ファイルへの書き出し・読み込み（README「ツールを追加するとき」20。決定 D31） ---
+  // 中身はこの端末の中で作り、どこにも送信しない。機種変更のときはファイルを移して読み込む
+  var TOOL = 'loan-sim';
+  $('backup-export').addEventListener('click', function () {
+    var data = { draft: state, scenarios: scenarios };
+    var blob = new Blob([JSON.stringify(Calc.buildBackup(TOOL, data), null, 2)], { type: 'application/json' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = Calc.backupFileName(TOOL);
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+    $('share-msg').textContent = 'ファイルに書き出しました。機種変更のときは、このファイルを新しい端末に移して「ファイルから読み込む」を押してください。';
+  });
+  $('backup-import').addEventListener('click', function () { $('backup-file').click(); });
+  $('backup-file').addEventListener('change', function () {
+    var file = this.files && this.files[0];
+    this.value = '';
+    if (!file) return;
+    if (file.size > 1024 * 1024) { $('share-msg').textContent = 'ファイルが大きすぎます。このツールで書き出したファイルを選んでください。'; return; }
+    file.text().then(function (text) {
+      var r = Calc.parseBackup(text, TOOL, ['draft']);
+      if (!r.ok) { $('share-msg').textContent = r.error; return; }
+      if (!window.confirm('ファイルの内容で、今の条件と保存した条件を置き換えます。よろしいですか？')) return;
+      var list = Array.isArray(r.data.scenarios) ? r.data.scenarios : [];
+      scenarios = list.filter(function (sc) { return sc && typeof sc === 'object'; }).slice(0, MAX_SCN).map(function (sc, i) {
+        return { id: String(sc.id || Date.now().toString(36) + i).slice(0, 20), name: String(sc.name || ('条件 ' + (i + 1))).slice(0, 30), state: normalize(sc.state) };
+      });
+      compareIds = {};
+      state = normalize(r.data.draft); fromShare = false;
+      saveScenarios(); fillForm(); renderScenarios(); update();
+      $('share-msg').textContent = 'ファイルから読み込みました（保存した条件 ' + scenarios.length + ' 件）。';
+    }, function () { $('share-msg').textContent = 'ファイルを読み取れませんでした。'; });
+  });
+
   // --- 前提の時点（確認日から一定期間たったら注意） ---
   (function () {
     var d = K.CHECKED.split('-');
