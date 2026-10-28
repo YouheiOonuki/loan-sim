@@ -1,7 +1,7 @@
 // ===========================
 // 画面の骨組み（yorozu-plans の docs/SCREEN.md 1.1）の共通部品
 //   - 「くわしく入れる」の summary に今の状態を出すときの小さな関数
-//   - 上端の固定バー（SCREEN.md 0 章の 3・D59）。見た目は style.css の .fixbar
+//   - 上端の固定バー（SCREEN.md 0 章の 3・D59）。見た目は style.css の .fixed-bar
 // seido-keisan の lib/screen.js と loan-sim の screen.js は同じ中身（直すときは両方）。計算にはかかわらない
 // ===========================
 (function () {

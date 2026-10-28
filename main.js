@@ -165,7 +165,7 @@
   }
   function removeButton(label, fn) {
     var b = document.createElement('button');
-    b.type = 'button'; b.className = 'icon-btn'; b.textContent = '×';
+    b.type = 'button'; b.className = 'btn'; b.textContent = '×';
     b.setAttribute('aria-label', label);
     b.addEventListener('click', fn);
     return b;
@@ -485,7 +485,7 @@
       cb.type = 'checkbox'; cb.id = 'cmp-' + sc.id; cb.checked = !!compareIds[sc.id];
       cb.addEventListener('change', function () { compareIds[sc.id] = cb.checked; renderCompare(); });
       var lb = document.createElement('label'); lb.htmlFor = cb.id; lb.textContent = sc.name;
-      var load = document.createElement('button'); load.type = 'button'; load.className = 'link-btn'; load.textContent = '読み込む';
+      var load = document.createElement('button'); load.type = 'button'; load.className = 'btn'; load.textContent = '読み込む';
       load.addEventListener('click', function () {
         state = normalize(sc.state); fromShare = false; fillForm(); update();
         $('scn-msg').textContent = '「' + sc.name + '」を読み込みました。';
