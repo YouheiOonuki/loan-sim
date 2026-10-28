@@ -68,7 +68,6 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 :where(html:not([data-skin="base"])) :where(.notice, [data-keep]) { border-left: 4px solid var(--text); background: var(--bg-2); padding: var(--sp-2) var(--sp-3); }
 :where(html:not([data-skin="base"])) :where(.fixed-bar) { position: sticky; bottom: 0; background: var(--card); border-top: 1px solid var(--border); padding: var(--sp-2) var(--sp-4); }
 /* yorozu-common:end */
-:where(html:not([data-skin="base"])) a.btn-primary { color: var(--on-accent); }
 
 /* ヘッダー */
 .app-header { text-align: center; padding: var(--sp-4); background: var(--bg-2); border-bottom: 1px solid var(--border); }
@@ -221,3 +220,6 @@ details.card.opt[open] > summary { border-bottom: 1px solid var(--border); margi
 .content details { margin: var(--sp-1) 0; }
 .content summary { color: var(--accent); }
 .content details[open] summary { margin-bottom: var(--sp-1); }
+
+/* 1 行に 1 つのリンク（使い方への行・案内のカード・出典の一覧）も押せる高さに（DESIGN の 44px。K192 段 3 の 4 の検収） */
+:where(html:not([data-skin="base"])) :where(p, li) > a:only-child { display: inline-flex; align-items: center; min-height: var(--tap); }
