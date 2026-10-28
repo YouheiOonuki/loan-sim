@@ -18,8 +18,8 @@
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="theme-color" content="#8b4513" media="(prefers-color-scheme: light)">
-  <meta name="theme-color" content="#1c1814" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#eef0f2" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#15191d" media="(prefers-color-scheme: dark)">
 
   <script type="application/ld+json">
   {
@@ -51,7 +51,7 @@
   </header>
 
   <!-- 固定バー（SCREEN.md 1.1・D59）: 結果が出たあと、結果が画面の外にあるときだけ上端に出す。読み込み時は無い（CLS を出さない） -->
-  <div class="fixbar fixbar-narrow" id="fixbar" role="status" hidden>
+  <div class="fixed-bar fixbar-narrow" id="fixbar" role="status" hidden>
     <a href="#result-card" id="fixbar-link"><span id="fixbar-text"></span> ▸ 結果へ</a>
   </div>
 
@@ -99,8 +99,8 @@
     <!-- 4. 結果 -->
     <section class="card result result-card" aria-labelledby="h-result" aria-live="polite" id="result-card" tabindex="-1">
       <h2 id="h-result">試算の結果</h2>
-      <div id="errors" class="msg msg-error" role="alert" hidden></div>
-      <div id="warnings" class="msg msg-warn" hidden></div>
+      <div id="errors" class="msg field-error" role="alert" hidden></div>
+      <div id="warnings" class="msg notice" hidden></div>
       <div id="summary">
         <dl class="kpi" id="result-main">
           <div><dt>毎月の返済額</dt><dd id="k-monthly">—</dd></div>
@@ -151,14 +151,14 @@
         <summary>金利（変わる時期を行で足す）: <span class="opt-state" id="sum-rate">変わらない</span></summary>
         <div id="rate-rows" class="rows"></div>
         <div class="btn-row">
-          <button type="button" class="btn btn-sub" id="add-rate">＋ 金利が変わる時期を足す</button>
+          <button type="button" class="btn" id="add-rate">＋ 金利が変わる時期を足す</button>
         </div>
         <p class="small">上昇シナリオを一発で入れる（足した行は置き換わります）：</p>
         <div class="btn-row" id="presets">
-          <button type="button" class="btn btn-sub" data-preset="yearly">毎年 +0.1%（10 年間）</button>
-          <button type="button" class="btn btn-sub" data-preset="y5">5 年後に +1%</button>
-          <button type="button" class="btn btn-sub" data-preset="y10">10 年後に +1%</button>
-          <button type="button" class="btn btn-sub" data-preset="clear">変わらない</button>
+          <button type="button" class="btn" data-preset="yearly">毎年 +0.1%（10 年間）</button>
+          <button type="button" class="btn" data-preset="y5">5 年後に +1%</button>
+          <button type="button" class="btn" data-preset="y10">10 年後に +1%</button>
+          <button type="button" class="btn" data-preset="clear">変わらない</button>
         </div>
       </details>
 
@@ -175,7 +175,7 @@
         <summary>繰上返済（何回でも足せる）: <span class="opt-state" id="sum-pre">なし</span></summary>
         <div id="pre-rows" class="rows"></div>
         <div class="btn-row">
-          <button type="button" class="btn btn-sub" id="add-pre">＋ 繰上返済を足す</button>
+          <button type="button" class="btn" id="add-pre">＋ 繰上返済を足す</button>
         </div>
         <div class="field">
           <label for="fee">繰上返済 1 回あたりの手数料（円）</label>
@@ -216,7 +216,7 @@
         <p class="small">支払額・元金には繰上返済を含みます（円未満は四捨五入）。</p>
       </div>
       <div class="btn-row">
-        <button type="button" class="btn btn-sub" id="csv">毎月の返済表を CSV で保存</button>
+        <button type="button" class="btn" id="csv">毎月の返済表を CSV で保存</button>
       </div>
     </section>
 
@@ -239,10 +239,10 @@
         </table>
       </div>
       <div class="btn-row">
-        <button type="button" class="btn btn-sub" id="share">今の条件を開くリンクをコピー</button>
-        <button type="button" class="btn btn-sub" id="backup-export">ファイルに書き出す</button>
-        <button type="button" class="btn btn-sub" id="backup-import">ファイルから読み込む</button>
-        <button type="button" class="btn btn-sub" data-reset-storage="loan-sim_">保存した内容をすべて消す（初期状態に戻す）</button>
+        <button type="button" class="btn" id="share">今の条件を開くリンクをコピー</button>
+        <button type="button" class="btn" id="backup-export">ファイルに書き出す</button>
+        <button type="button" class="btn" id="backup-import">ファイルから読み込む</button>
+        <button type="button" class="btn" data-reset-storage="loan-sim_">保存した内容をすべて消す（初期状態に戻す）</button>
         <input type="file" id="backup-file" accept=".json,application/json" hidden>
       </div>
       <p id="share-msg" class="small" aria-live="polite"></p>
