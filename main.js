@@ -502,7 +502,7 @@
     $('compare-wrap').hidden = cols.length < 2;
     if (cols.length < 2) return;
     var res = cols.map(function (c) { return { c: c, r: Calc.simulate(toInput(normalize(c.state), true)) }; });
-    $('compare-head').innerHTML = '<tr><th scope="col"></th>' + res.map(function (x) { return '<th scope="col">' + esc(x.c.name) + '</th>'; }).join('') + '</tr>';
+    $('compare-head').innerHTML = '<tr><td></td>' + res.map(function (x) { return '<th scope="col">' + esc(x.c.name) + '</th>'; }).join('') + '</tr>';
     var ok = function (x) { return !x.r.errors.length; };
     var lines = [
       ['借入額', function (x) { return man(principalOf(normalize(x.c.state))); }],
