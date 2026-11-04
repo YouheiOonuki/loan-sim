@@ -319,6 +319,7 @@
     renderChart(withPre, hasPre ? none : null);
     renderYearTable(withPre);
     renderCompare();
+    window.yzUsed?.();
   }
 
   // --- 「くわしく入れる」の summary（SCREEN.md 1.1 の 4）に今の状態を出す ---
