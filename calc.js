@@ -1,3 +1,4 @@
+// 生成物。正本は youheioonuki.github.io の tools/common/calc/loan.js（tools/sync-common.mjs --calc で配る。ここは手で直さない。yorozu-plans D484）
 // ===========================
 // 住宅ローン 返済シミュレーター — 計算ロジック（画面から切り離した純粋関数）
 // 金額はすべて円、金利は年利の %。内部は小数のまま計算し、丸めは表示側で行う

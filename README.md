@@ -42,7 +42,7 @@ yorozu-craft のツールの1つです（共通ルールは [youheioonuki.github
 |---------|------|
 | `index.html` | シミュレーター本体 |
 | `guide.html` | 使い方・期間短縮と返済額軽減・5 年ルールと 125% ルール・未払利息・計算方法・根拠と確認日・よくある質問・ご利用上の注意・更新履歴 |
-| `calc.js` | 計算ロジック（画面から切り離した純粋関数） |
+| `calc.js` | 計算ロジック（画面から切り離した純粋関数）。**生成物**: 正本は youheioonuki.github.io の `tools/common/calc/loan.js`（yorozu-plans D484。seido-keisan のライフプランと同じ計算）。直すときは正本を直して `node tools/sync-common.mjs --calc <このリポジトリ>` で配る（`--check` が違いを落とす） |
 | `constants.js` | 出典と確認日 |
 | `main.js` | 画面の制御・保存・共有リンク・グラフ・比較 |
 | `screen.js` | 画面の骨組み（yorozu-plans の SCREEN.md 1.1）の共通部品: 「くわしく入れる」の summary の更新と上端の固定バー（seido-keisan の `lib/screen.js` と同じ中身） |
