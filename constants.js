@@ -7,9 +7,9 @@
 (function (root) {
   'use strict';
 
-  // 2026-09-23 の確認: overview と jhf は本文を直接読んで確認。unpaid・rules・principal は検索結果の要約で確認
+  // 2026-11-12 の確認: 5 か所は Q-198 で開いて確認。unpaid の注記を全銀協の原文に合わせ、unpaid-final（三菱UFJ銀行）を本文で確認して足した（Q-211）
   var CONSTANTS = {
-    CHECKED: '2026-09-23',     // 下の出典を最後に確かめた日
+    CHECKED: '2026-11-12',    // 下の出典を最後に確かめた日
     STALE_MONTHS: 12,          // 確認日からこの月数がたったら画面に注意を出す
 
     SOURCES: [
@@ -32,7 +32,14 @@
         label: '変動金利住宅ローンの未払利息とは？',
         publisher: '一般社団法人 全国銀行協会',
         url: 'https://www.zenginkyo.or.jp/article/tag-d/7824/',
-        note: '未払利息が生じるしくみと、最終返済期日に元金とあわせて支払うのが一般的であること',
+        note: '未払利息が生じるしくみ。未払利息の精算の方法は、金融機関によって異なる',
+      },
+      {
+        key: 'unpaid-final',
+        label: '住宅ローンの5年ルール・125％ルールとは？変動金利の仕組みや注意点を解説',
+        publisher: '三菱UFJ銀行',
+        url: 'https://www.bk.mufg.jp/kariru/jutaku/column/008/index.html',
+        note: '未払利息は翌月以降に繰り延べる。最終返済日に未返済残高が生じる場合は、原則として一括返済。このツールの計算（最終返済期日に残りの元金とあわせて払う）の裏付け',
       },
       {
         key: 'rules',
