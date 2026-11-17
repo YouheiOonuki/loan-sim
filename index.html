@@ -203,7 +203,7 @@
         <button type="button" role="tab" id="tab-table" aria-controls="panel-table" aria-selected="false" tabindex="-1">年ごとの返済表</button>
       </div>
       <div id="panel-chart" role="tabpanel" aria-labelledby="tab-chart">
-        <div id="chart" class="chart"></div>
+        <div id="chart" class="chart"><div id="marks" class="marks"></div></div>
         <p class="legend"><span class="lg lg-a"></span>今の条件 <span class="lg lg-b" id="lg-b"></span><span id="lg-b-text">繰上返済なし</span></p>
       </div>
       <div id="panel-table" role="tabpanel" aria-labelledby="tab-table" hidden>
@@ -288,6 +288,7 @@
   <script src="./used.js"></script>
   <script src="./constants.js"></script>
   <script src="./calc.js"></script>
+  <script src="./chart-geom.js"></script>
   <script src="./screen.js"></script>
   <script src="./reset-storage.js"></script>
   <script src="./main.js"></script>
