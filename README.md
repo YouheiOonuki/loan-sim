@@ -14,6 +14,7 @@ yorozu-craft のツールの1つです（共通ルールは [youheioonuki.github
 - 繰上返済（期間短縮／返済額軽減）を何回でも足せる。1 回あたりの手数料
 - 結果：毎月の返済額と推移、総返済額、利息の総額、完済年月。繰上返済なしとの比較
 - 残高の推移グラフ（SVG・ライブラリなし）、年ごとの返済表、毎月の返済表の CSV
+- グラフの線の上に繰上返済の行ごとの印。左右に引く（← → で 1 か月、Shift で 12 か月）と、その行の時期が変わり、結果がその場で変わる。動かせる範囲は返済の始めの月から、その行が無いときの完済の月まで
 - 条件を名前を付けて保存（最大 10 件、localStorage の `loan-sim_scenarios`）し、並べて比較
 - 条件を `#s=` の共有リンクにする（サーバーには送信されない）
 - 入力中の条件はブラウザに自動保存（`loan-sim_draft`）
@@ -44,13 +45,15 @@ yorozu-craft のツールの1つです（共通ルールは [youheioonuki.github
 | `guide.html` | 使い方・期間短縮と返済額軽減・5 年ルールと 125% ルール・未払利息・計算方法・根拠と確認日・よくある質問・ご利用上の注意・更新履歴 |
 | `calc.js` | 計算ロジック（画面から切り離した純粋関数）。**生成物**: 正本は youheioonuki.github.io の `tools/common/calc/loan.js`（yorozu-plans D484。seido-keisan のライフプランと同じ計算）。直すときは正本を直して `node tools/sync-common.mjs --calc <このリポジトリ>` で配る（`--check` が違いを落とす） |
 | `constants.js` | 出典と確認日 |
-| `main.js` | 画面の制御・保存・共有リンク・グラフ・比較 |
+| `chart-geom.js` | グラフの目盛りと、繰上返済の印の位置・動かせる範囲（純粋関数。範囲は `calc.js` の `simulate` を呼んで取る） |
+| `main.js` | 画面の制御・保存・共有リンク・グラフ・繰上返済の印・比較 |
 | `screen.js` | 画面の骨組み（yorozu-plans の SCREEN.md 1.1）の共通部品: 「くわしく入れる」の summary の更新と上端の固定バー（seido-keisan の `lib/screen.js` と同じ中身） |
 | `style.css` | 見た目（和紙風の配色、ダークモード対応） |
 | `404.html` | ツール配下の存在しない URL で出るページ（サイト共通のもの） |
 | `favicon.svg` / `apple-touch-icon.png` / `og-image.png` | アイコン / ホーム画面用アイコン / SNS 共有用画像（1200×630） |
 | `sitemap.xml` | サイトマップ（robots.txt はドメイン直下で管理） |
 | `tests/calc.test.js` | 計算のテスト（`node --test tests/*.test.js`。`.github/workflows/test.yml` で push・PR のたびに自動実行） |
+| `tests/chart-geom.test.js` | 繰上返済の印の位置 ＝ 行の時期、月の境、範囲の端、行が 0、同じ月の 2 つ |
 | `tests/backup.test.js` | 保存内容のファイルへの書き出し・読み込み（`calc.js` の `buildBackup` / `parseBackup`）のテスト |
 
 ## ライセンス

@@ -7,6 +7,7 @@
 
   var Calc = window.Calc;
   var K = window.Constants;
+  var Geom = window.ChartGeom;
   var MAN = 10000;
 
   // --- ブラウザへの保存（README「ツールを追加するとき」12） ---
@@ -72,7 +73,7 @@
   function num(v) { var n = parseFloat(v); return isFinite(n) ? n : 0; }
   function yen(v) { return Math.round(v).toLocaleString('ja-JP') + ' 円'; }
   function man(v) { return (Math.round(v / 1000) / 10).toLocaleString('ja-JP', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + ' 万円'; }
-  function monthIndex(y, m) { return (y - 1) * 12 + m; }
+  var monthIndex = Geom.monthIndex;
   function startYM() {
     var p = state.start.split('-');
     return { y: +p[0], m: +p[1] };
@@ -363,16 +364,13 @@
     return (v < 0 ? '−' : '＋') + man(Math.abs(v));
   }
 
-  // --- グラフ（SVG の折れ線。ライブラリは使わない） ---
+  // --- グラフ（SVG の折れ線。ライブラリは使わない）。目盛りは chart-geom.js ---
   var SVGNS = 'http://www.w3.org/2000/svg';
+  var chartScale = null;   // 直近のグラフの目盛り（印を引くときに使う）
   function renderChart(a, b) {
-    var W = 640, H = 340, L = 96, R = 14, T = 16, Bm = 44;
-    var maxM = Math.max(a.months, b ? b.months : 0);
-    var maxB = Math.max(a.rows[0].balance + a.rows[0].principal + a.rows[0].prepay, b ? b.rows[0].balance + b.rows[0].principal : 0);
-    var yStep = niceStep(maxB / MAN / 4);
-    var yMax = Math.ceil(maxB / MAN / yStep) * yStep;
-    var x = function (k) { return L + (W - L - R) * k / maxM; };
-    var y = function (v) { return T + (H - T - Bm) * (1 - v / MAN / yMax); };
+    var sc = Geom.scale(a, b);
+    var W = sc.W, H = sc.H, L = sc.L, R = sc.R, Bm = sc.Bm, maxM = sc.maxM, yStep = sc.yStep, yMax = sc.yMax, x = sc.x, y = sc.y;
+    chartScale = sc;
 
     var svg = document.createElementNS(SVGNS, 'svg');
     svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
@@ -403,16 +401,87 @@
     if (b) line(b, 'line-b');
     line(a, 'line-a');
 
+    // 印の層（#marks）は残し、折れ線の svg だけを差し替える（引いている印のボタンを作り直さない）
     var box = $('chart');
-    box.textContent = '';
-    box.appendChild(svg);
+    var old = box.querySelector('svg');
+    if (old) box.replaceChild(svg, old); else box.insertBefore(svg, box.firstChild);
+    renderMarks(a, sc);
     $('lg-b').hidden = !b;
     $('lg-b-text').hidden = !b;
   }
-  function niceStep(raw) {
-    var p = Math.pow(10, Math.floor(Math.log10(Math.max(raw, 1))));
-    var n = raw / p;
-    return (n <= 1 ? 1 : n <= 2 ? 2 : n <= 5 ? 5 : 10) * p;
+
+  // --- 繰上返済の印（Q-406）: 線の上に行ごとの印。左右に引く・← → で、その行の時期を 1 か月ずつ動かす ---
+  function renderMarks(res, sc) {
+    var layer = $('marks');
+    var list = Geom.marks(res, state.prepays, sc);
+    while (layer.children.length > list.length) layer.removeChild(layer.lastChild);
+    list.forEach(function (mk) {
+      var btn = layer.children[mk.i];
+      if (!btn) {
+        btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'mark';
+        btn.dataset.i = mk.i;
+        btn.setAttribute('aria-keyshortcuts', 'ArrowLeft ArrowRight Shift+ArrowLeft Shift+ArrowRight');
+        var dot = document.createElement('span');
+        dot.className = 'mark-dot';
+        dot.setAttribute('aria-hidden', 'true');
+        dot.textContent = mk.i + 1;
+        btn.appendChild(dot);
+        btn.addEventListener('keydown', markKey);
+        btn.addEventListener('pointerdown', markDown);
+        btn.addEventListener('pointermove', markMove);
+        btn.addEventListener('pointerup', markUp);
+        btn.addEventListener('pointercancel', markUp);
+        layer.appendChild(btn);
+      }
+      btn.dataset.month = mk.month;
+      btn.style.left = (mk.x / sc.W * 100) + '%';
+      btn.style.top = 'calc(' + (mk.y / sc.H * 100) + '% + ' + (mk.stack * 46) + 'px)';
+      btn.setAttribute('aria-label', '繰上返済 ' + (mk.i + 1) + ' 行目の時期 ' + ymLabel(mk.month));
+    });
+  }
+
+  // i 行目の時期を k か月目にして、欄・保存・結果をその場で書き換える
+  function moveMark(i, k) {
+    var row = state.prepays[i];
+    if (!row || monthIndex(row.y, row.m) === k) return;
+    var ym = Geom.yearMonthOf(k);
+    row.y = ym.y; row.m = ym.m;
+    var div = $('pre-rows').children[i];
+    var inputs = div ? div.querySelectorAll('.when input') : [];
+    if (inputs.length === 2) { inputs[0].value = row.y; inputs[1].value = row.m; }
+    clearTimeout(timer);
+    update();
+  }
+  function rangeOf(i) { return Geom.markRange(Calc, toInput(state, true), i); }
+  function markKey(e) {
+    if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+    e.preventDefault();
+    var i = +this.dataset.i, row = state.prepays[i];
+    if (!row) return;
+    var step = (e.shiftKey ? 12 : 1) * (e.key === 'ArrowRight' ? 1 : -1);
+    moveMark(i, Geom.clamp(monthIndex(row.y, row.m) + step, rangeOf(i)));
+  }
+  var drag = null;
+  function markDown(e) {
+    if (e.button !== 0 || !chartScale) return;
+    var i = +this.dataset.i;
+    if (!state.prepays[i]) return;
+    e.preventDefault();
+    this.focus();
+    this.setPointerCapture(e.pointerId);
+    drag = { i: i, id: e.pointerId, range: rangeOf(i), sc: chartScale, rect: $('chart').querySelector('svg').getBoundingClientRect() };
+  }
+  function markMove(e) {
+    if (!drag || e.pointerId !== drag.id) return;
+    var px = (e.clientX - drag.rect.left) / drag.rect.width * drag.sc.W;
+    var k = Geom.clamp(Geom.monthAtX(px, drag.sc), drag.range);
+    moveMark(drag.i, k);
+    this.style.left = (drag.sc.x(k) / drag.sc.W * 100) + '%';   // 計算が通らない月でも、指の下に付いてくる
+  }
+  function markUp(e) {
+    if (drag && e.pointerId === drag.id) drag = null;
   }
 
   function renderYearTable(res) {
