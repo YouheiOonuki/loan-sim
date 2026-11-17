@@ -1,6 +1,6 @@
 // ===========================
 // 住宅ローン 返済シミュレーター — 前提と出典（値・出典・確認日をセットで）
-// このツールは税制などの制度の値を使わない。5 年ルール・125% ルール・未払利息の扱いは
+// このツールは税制などの制度の値を使わない（KOJO は使い方に載せる手続の出どころだけ）。5 年ルール・125% ルール・未払利息の扱いは
 // 金融機関の一般的な説明に合わせた。見直すときは CHECKED を更新する
 // ブラウザでは window.Constants、Node（テスト）では module.exports で使う
 // ===========================
@@ -56,6 +56,18 @@
         note: '5 年ルール・125% ルールは元利均等返済のもの。元金均等返済は金利の見直しのたびに返済額が変わる',
       },
     ],
+
+    // 使い方の「住宅ローン控除の 1 年目の確定申告と、添える書類」の出どころ（guide だけが使う。控除額は計算しない）。
+    // 4 ページとも「令和4年以降に居住の用に供した場合」で、2026-11-18 に開いた時点は [令和8年4月1日現在法令等]（Q-338）
+    KOJO: {
+      CHECKED: '2026-11-18',  // 下の 4 ページを開いて、手続と提出書類を確かめた日
+      SOURCES: [
+        { publisher: '国税庁', label: 'No.1211-1 住宅の新築等をし、令和4年以降に居住の用に供した場合（住宅借入金等特別控除）', url: 'https://www.nta.go.jp/taxes/shiraberu/taxanswer/shotoku/1211-1.htm' },
+        { publisher: '国税庁', label: 'No.1211-2 買取再販住宅を取得し、令和4年以降に居住の用に供した場合（住宅借入金等特別控除）', url: 'https://www.nta.go.jp/taxes/shiraberu/taxanswer/shotoku/1211-2.htm' },
+        { publisher: '国税庁', label: 'No.1211-3 中古住宅を取得し、令和4年以降に居住の用に供した場合（住宅借入金等特別控除）', url: 'https://www.nta.go.jp/taxes/shiraberu/taxanswer/shotoku/1211-3.htm' },
+        { publisher: '国税庁', label: 'No.1211-4 増改築等をし、令和4年以降に居住の用に供した場合（住宅借入金等特別控除）', url: 'https://www.nta.go.jp/taxes/shiraberu/taxanswer/shotoku/1211-4.htm' },
+      ],
+    },
   };
 
   if (typeof module !== 'undefined' && module.exports) module.exports = CONSTANTS;

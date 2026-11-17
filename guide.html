@@ -181,7 +181,24 @@
         <dt>銀行のシミュレーションと数円〜数百円ずれるのはなぜですか？</dt>
         <dd>このツールは小数のまま計算して表示で円未満を四捨五入し、金融機関は円未満切り捨てなど端数の処理が異なるためです。</dd>
         <dt>ボーナス返済や住宅ローン控除は計算できますか？</dt>
-        <dd>今はできません（借り換えの比較も）。</dd>
+        <dd>今はできません（借り換えの比較も）。
+          <details>
+            <summary>住宅ローン控除の 1 年目の確定申告と、添える書類</summary>
+            <p>控除を受ける最初の年分は、確定申告書に書類を添えて税務署に出します。給与所得者は、2 年目以後の年分は年末調整で受けられます。</p>
+            <p>住宅の新築等（No.1211-1）で確定申告書に添える、共通の書類：</p>
+            <ul>
+              <li>「住宅借入金等特別控除額の計算明細書」（連帯債務がある場合は「（付表）連帯債務がある場合の住宅借入金等の年末残高の計算明細書」も）</li>
+              <li>金融機関等から交付された「住宅取得資金に係る借入金の年末残高等証明書」</li>
+              <li>家屋の「登記事項証明書」などで床面積が50平方メートル以上（特例居住用家屋または特例認定住宅等の場合は、40平方メートル以上50平方メートル未満）であることを明らかにする書類</li>
+              <li>家屋の「工事請負契約書」または家屋の「売買契約書」の写しなどで家屋の取得対価の額を明らかにする書類</li>
+              <li>土地の購入に係る住宅借入金等について控除を受ける場合：土地の「登記事項証明書」などで敷地の取得年月日を明らかにする書類、土地の売買契約書の写しなど土地の取得対価の額を明らかにする書類</li>
+              <li>国または地方公共団体等から補助金等の交付を受けた場合：市区町村からの補助金決定通知書などの補助金等の額を証する書類</li>
+              <li>住宅取得等資金の贈与の特例を受けた場合：贈与税の申告書など住宅取得等資金の額を証する書類の写し</li>
+            </ul>
+            <p>認定長期優良住宅・認定低炭素住宅・ZEH水準省エネ住宅・省エネ基準適合住宅は、区分に応じた書類も添えます。敷地の購入に係る借入金や「調書方式」の金融機関から借りた場合も、書類が変わります。買取再販住宅・中古住宅・増改築等は、それぞれのページに書類があります。</p>
+            <ul id="kojo-sources"></ul>
+          </details>
+        </dd>
       </dl>
     </article>
 
@@ -208,9 +225,8 @@
 
       <h3 id="changelog">更新履歴</h3>
       <ul>
+        <li><time datetime="2026-11-18">2026年11月18日</time> よくある質問に、住宅ローン控除の 1 年目の確定申告と添える書類を足しました</li>
         <li><time datetime="2026-11-12">2026年11月12日</time> 説明を短くまとめ直し、未払利息を払う時期は金融機関で異なると改めました</li>
-        <li><time datetime="2026-09-25">2026年9月25日</time> 保存した内容をすべて消すボタンを足しました</li>
-        <li><time datetime="2026-09-24">2026年9月24日</time> 保存している内容をファイルに書き出し・読み込みできるようにしました</li>
         <li><time datetime="2026-09-23">2026年9月23日</time> 公開</li>
       </ul>
     </article>
@@ -241,6 +257,15 @@
         li.appendChild(a); li.appendChild(document.createTextNode('：' + x.note));
         ul.appendChild(li);
       });
+      var kd = K.KOJO.CHECKED.split('-'), ku = document.getElementById('kojo-sources');
+      K.KOJO.SOURCES.forEach(function (x) {
+        var li = document.createElement('li'), a = document.createElement('a');
+        a.href = x.url; a.rel = 'noopener'; a.target = '_blank'; a.textContent = x.publisher + '「' + x.label + '」';
+        li.appendChild(a); ku.appendChild(li);
+      });
+      var kl = document.createElement('li');
+      kl.appendChild(document.createTextNode('確認日 ' + kd[0] + '年' + (+kd[1]) + '月' + (+kd[2]) + '日'));
+      ku.appendChild(kl);
       var d = K.CHECKED.split('-'), t = document.getElementById('checked');
       t.dateTime = K.CHECKED; t.textContent = d[0] + '年' + (+d[1]) + '月' + (+d[2]) + '日';
     })();
