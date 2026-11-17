@@ -442,10 +442,12 @@
     });
   }
 
-  // i 行目の時期を k か月目にして、欄・保存・結果をその場で書き換える
+  // i 行目の時期を k か月目にして、欄・保存・結果をその場で書き換える。
+  // その 1 歩の先で計算がエラーになるなら、その 1 歩を取り消す（欄・保存・結果・印は 1 歩前のまま。Q-413）
   function moveMark(i, k) {
     var row = state.prepays[i];
     if (!row || monthIndex(row.y, row.m) === k) return;
+    if (!Geom.canMove(Calc, toInput(state, true), i, k)) return;
     var ym = Geom.yearMonthOf(k);
     row.y = ym.y; row.m = ym.m;
     var div = $('pre-rows').children[i];
@@ -478,7 +480,6 @@
     var px = (e.clientX - drag.rect.left) / drag.rect.width * drag.sc.W;
     var k = Geom.clamp(Geom.monthAtX(px, drag.sc), drag.range);
     moveMark(drag.i, k);
-    this.style.left = (drag.sc.x(k) / drag.sc.W * 100) + '%';   // 計算が通らない月でも、指の下に付いてくる
   }
   function markUp(e) {
     if (drag && e.pointerId === drag.id) drag = null;
