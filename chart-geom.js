@@ -1,6 +1,6 @@
 // ===========================
 // 住宅ローン 返済シミュレーター — グラフの目盛りと、繰上返済の印の位置（画面から切り離した純粋関数）
-// 計算はしない。範囲と、1 歩の先がエラーにならないかは calc.js の simulate を呼んで見る（Q-406・Q-413）
+// 計算はしない。範囲と、動かす先までの月がエラーにならないかは calc.js の simulate を呼んで見る（Q-406・Q-413・Q-433）
 // ブラウザでは window.ChartGeom、Node（テスト）では module.exports で使う
 // ===========================
 (function (root) {
@@ -58,6 +58,16 @@
     return Calc.simulate(Object.assign({}, input, { prepayments: pre })).errors.length === 0;
   }
 
+  /**
+   * i 行目を今の月から k か月目へ向けて 1 か月ずつたどり、canMove が続けて通る最後の月（Q-433）。
+   * 通らない月が 1 つでも間に在れば、その手前で止まる（エラーの月をまたいで、その先の通る月へは飛ばない）
+   */
+  function reach(Calc, input, i, k) {
+    var at = input.prepayments[i].month, d = k > at ? 1 : -1;
+    while (at !== k && canMove(Calc, input, i, at + d)) at += d;
+    return at;
+  }
+
   function clamp(k, range) { return Math.min(range.max, Math.max(range.min, k)); }
 
   /**
@@ -79,7 +89,7 @@
 
   var ChartGeom = {
     monthIndex: monthIndex, yearMonthOf: yearMonthOf, niceStep: niceStep, scale: scale,
-    monthAtX: monthAtX, markRange: markRange, canMove: canMove, clamp: clamp, marks: marks,
+    monthAtX: monthAtX, markRange: markRange, canMove: canMove, reach: reach, clamp: clamp, marks: marks,
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = ChartGeom;
   else root.ChartGeom = ChartGeom;

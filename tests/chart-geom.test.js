@@ -102,14 +102,18 @@ function inputAt(rate, pre) {
     prepayments: pre.map((p) => ({ month: p.k, amount: p.a * MAN, type: p.t })),
   };
 }
-// main.js の markKey → moveMark と同じ順: 範囲で止めてから、その 1 歩の先を simulate で見る
-function press(rate, pre, i, step) {
+// main.js の moveMark と同じ順: 範囲で止めてから、今の月から 1 か月ずつたどって通る所まで（Q-433）
+function moveTo(rate, pre, i, target) {
   const inp = inputAt(rate, pre);
-  const k = G.clamp(pre[i].k + step, G.markRange(C, inp, i));
-  if (k === pre[i].k || !G.canMove(C, inp, i, k)) return false;
+  const k0 = G.clamp(target, G.markRange(C, inp, i));
+  if (k0 === pre[i].k) return false;
+  const k = G.reach(C, inp, i, k0);
+  if (k === pre[i].k) return false;
   pre[i] = Object.assign({}, pre[i], { k });
   return true;
 }
+// markKey と同じ: 今の月 ± 1 か月（Shift は 12 か月）
+function press(rate, pre, i, step) { return moveTo(rate, pre, i, pre[i].k + step); }
 const CASES = [
   // 前の行（60 か月目 500 万円）を後ろへ: 240 か月目の行を越えた先で、自分の額が残高を超える
   { name: '前の行を後ろへ', rate: 1, pre: [{ k: 60, a: 500, t: 'shorten' }, { k: 240, a: 800, t: 'shorten' }], i: 0, dir: 1, stop: 254 },
@@ -137,13 +141,44 @@ test('止まる月 ＝ エラーにならない最後の月（3 通り、キー�
   }
 });
 
-test('12 か月の 1 歩が取り消されたら止まるだけ（1 か月ずつ試さない）', () => {
+test('Shift の 12 か月の間にエラーの月が在れば、その手前で止まる（Q-433）', () => {
   const c = CASES[2];
   const pre = c.pre.map((p) => Object.assign({}, p, { k: p.k === 60 ? 150 : p.k }));
-  assert.equal(press(c.rate, pre, 0, 12), false);   // 162 か月目はエラー
-  assert.equal(pre[0].k, 150);                        // 156 までは寄らない
-  assert.equal(press(c.rate, pre, 0, 1), true);       // 1 か月なら進める
-  assert.equal(pre[0].k, 151);
+  assert.equal(press(c.rate, pre, 0, 12), true);    // 162 か月目へ向けて、157 か月目がエラー
+  assert.equal(pre[0].k, 156);                        // その手前の 156 で止まる
+  assert.equal(press(c.rate, pre, 0, 12), false);   // 止まる月から先へは動かない
+  assert.equal(pre[0].k, 156);
+});
+
+test('引いて指を範囲の端まで動かしても、印は止まる月を超えない。途中の月はどれもエラーにならない（3 通り、Q-433）', () => {
+  for (const c of CASES) {
+    // 止まる月から、指を 1 か月ずつ範囲の端まで動かす
+    const pre = c.pre.map((p, j) => Object.assign({}, p, j === c.i ? { k: c.stop } : {}));
+    const range = G.markRange(C, inputAt(c.rate, pre), c.i);
+    const end = c.dir > 0 ? range.max : range.min;
+    let errors = 0;
+    for (let x = c.stop + c.dir; c.dir > 0 ? x <= end : x >= end; x += c.dir) {
+      moveTo(c.rate, pre, c.i, x);
+      errors += C.simulate(inputAt(c.rate, pre)).errors.length;
+    }
+    assert.equal(pre[c.i].k, c.stop, c.name);
+    assert.equal(errors, 0, c.name);
+    // 前から一気に端へ引いても、止まる月まで
+    const far = c.pre.map((p) => Object.assign({}, p));
+    moveTo(c.rate, far, c.i, end);
+    assert.equal(far[c.i].k, c.stop, c.name + '（一気に端へ）');
+    // Shift ＋ 矢印でも止まる月を超えない
+    const sh = c.pre.map((p, j) => Object.assign({}, p, j === c.i ? { k: c.stop - c.dir * 3 } : {}));
+    press(c.rate, sh, c.i, c.dir * 12);
+    assert.equal(sh[c.i].k, c.stop, c.name + '（Shift）');
+  }
+});
+
+test('reach: 間にエラーの月が無ければ、行き先まで動く（引き返す向きも）', () => {
+  const inp = inputAt(1, [{ k: 60, a: 500, t: 'shorten' }, { k: 240, a: 800, t: 'shorten' }]);
+  assert.equal(G.reach(C, inp, 0, 120), 120);
+  assert.equal(G.reach(C, inp, 0, 1), 1);
+  assert.equal(G.reach(C, inp, 0, 60), 60);
 });
 
 test('欄に手で入れた値のエラーは今のまま（calc.js の文）', () => {
@@ -151,10 +186,12 @@ test('欄に手で入れた値のエラーは今のまま（calc.js の文）', 
   assert.deepEqual(r.errors, ['157 か月目の繰上返済 20,000,000 円が、その時点の残高 19,993,163 円を超えています。']);
 });
 
-test('main.js: 書き換えの前に canMove を見る。印を指の下に付いてこさせない', () => {
+test('main.js: 書き換えの前に reach を通す。印を指の下に付いてこさせない', () => {
   const main = fs.readFileSync(path.join(__dirname, '..', 'main.js'), 'utf8');
   const body = main.slice(main.indexOf('function moveMark('), main.indexOf('function rangeOf('));
-  const check = body.indexOf('Geom.canMove(Calc, toInput(state, true), i, k)');
-  assert.ok(check > 0 && check < body.indexOf('row.y = ym.y'), 'canMove が書き換えより前');
+  const check = body.indexOf('Geom.reach(Calc, toInput(state, true), i, k)');
+  assert.ok(check > 0 && check < body.indexOf('row.y = ym.y'), 'reach が書き換えより前');
+  // 通るかの判定は chart-geom.js の canMove の 1 か所（main.js に simulate の判定を書かない）
+  assert.ok(!/canMove/.test(body), 'moveMark に canMove の 2 か所目がある');
   assert.ok(!/style\.left[^\n]*drag\.sc/.test(main), '引いている間に印だけを動かす行が残っている');
 });
