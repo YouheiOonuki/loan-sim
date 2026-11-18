@@ -287,7 +287,7 @@
     $('errors').innerHTML = errs.map(function (x) { return '<p>' + esc(x) + '</p>'; }).join('');
     $('summary').classList.toggle('is-stale', errs.length > 0);
     $('to-nenmatsu').hidden = errs.length > 0;
-    if (errs.length) { setBar(''); return; }
+    if (errs.length) { setBar(''); hideRateLine(); return; }
 
     $('warnings').hidden = !withPre.warnings.length;
     $('warnings').innerHTML = withPre.warnings.map(function (w) { return '<p>' + esc(w.text) + (w.type === 'unpaid' ? ' <a href="./guide.html#unpaid">未払利息とは</a>' : '') + '</p>'; }).join('');
@@ -318,6 +318,7 @@
 
     renderEffect(none, withPre, hasPre);
     renderChart(withPre, hasPre ? none : null);
+    renderRateLine();
     renderYearTable(withPre);
     renderCompare();
     window.yzUsed?.();
@@ -485,6 +486,108 @@
   function markUp(e) {
     if (drag && e.pointerId === drag.id) drag = null;
   }
+
+  // --- 当初の金利と毎月の返済額の線（Q-558）: 線の点は rate-line.js が simulate を呼んだ値（式を写さない）。
+  // 印を左右に引く・← →（Shift で大きく）と、当初の金利の欄（#rate0）だけが変わり、結果は入力したときと同じ update() で出し直す。
+  // 範囲は欄の min・max の属性。計算がエラーになる金利の手前で止まる（Q-413）。引いている間と、印にフォーカスがある間は横の端を保つ（Q-489）
+  var RL = window.RateLine;
+  var rateZu = null;    // 直近の枠（引くときに使う）
+  var rateHeld = 0;     // 保っている横の端。0 は保たない
+  var rateDrag = null;
+  var rateBtn = $('rate-mark');
+  function rateText(v) { return (+v).toLocaleString('ja-JP', { maximumFractionDigits: 2 }) + '%'; }
+  function hideRateLine() { $('rate-fig').hidden = true; rateZu = null; }
+  function renderRateLine() {
+    if (String(state.rate0).trim() === '') { hideRateLine(); return; }
+    var ri = $('rate0'), rate = num(state.rate0), input = toInput(state, true);
+    var pay = RL.payAt(Calc, input, rate);
+    if (pay === null) { hideRateLine(); return; }
+    var f = RL.frame(Calc, input, rate, ri.min, ri.max, rateHeld);
+    var svg = document.createElementNS(SVGNS, 'svg');
+    svg.setAttribute('viewBox', '0 0 ' + f.W + ' ' + f.H);
+    svg.setAttribute('role', 'img');
+    svg.setAttribute('aria-labelledby', 'h-rate');
+    function el(name, attrs, text) {
+      var e = document.createElementNS(SVGNS, name);
+      Object.keys(attrs).forEach(function (k) { e.setAttribute(k, attrs[k]); });
+      if (text !== undefined) e.textContent = text;
+      svg.appendChild(e);
+      return e;
+    }
+    for (var i = 0; i * f.yStep <= f.yMax + 1e-6; i++) {
+      var v = i * f.yStep;
+      el('line', { x1: f.L, x2: f.W - f.R, y1: f.y(v), y2: f.y(v), class: 'grid' });
+      el('text', { x: f.L - 6, y: f.y(v) + 8, 'text-anchor': 'end', class: 'axis' }, (v / MAN).toLocaleString('ja-JP') + '万');
+    }
+    for (var j = 0; f.x0 + j * f.xStep <= f.xMax + 1e-6; j++) {
+      var r = Math.round((f.x0 + j * f.xStep) * 100) / 100;
+      el('text', { x: f.x(r), y: f.H - 10, 'text-anchor': 'middle', class: 'axis' }, rateText(r));
+    }
+    var d = '', pen = false;
+    f.line.forEach(function (p) {
+      if (p.pay === null) { pen = false; return; }
+      d += (pen ? 'L' : 'M') + f.x(p.rate).toFixed(1) + ' ' + f.y(p.pay).toFixed(1);
+      pen = true;
+    });
+    el('path', { d: d, class: 'line-a' });
+    // 印の所の数（金利と額）。線は右上がりなので、印の左上か右下に置く
+    var cx = f.x(rate), cy = f.y(pay), left = cx - f.L > 260;   // 離す量は、390 幅でも印（当たり 44px）とフォーカスの輪にかからない幅
+    el('text', { x: left ? cx - 66 : cx + 66, y: left ? Math.max(f.T + 18, cy - 24) : Math.min(f.H - f.Bm - 6, cy + 44), 'text-anchor': left ? 'end' : 'start', class: 'pick' },
+      rateText(rate) + ' ' + yen(pay));
+    var box = $('rate-chart'), old = box.querySelector('svg');
+    if (old) box.replaceChild(svg, old); else box.insertBefore(svg, rateBtn);
+    $('rate-fig').hidden = false;
+    rateBtn.style.left = (cx / f.W * 100) + '%';
+    rateBtn.style.top = (cy / f.H * 100) + '%';
+    rateBtn.setAttribute('aria-label', '当初の金利 ' + rateText(rate));
+    rateZu = f;
+  }
+  // 当初の金利を v へ向けて動かし、欄・保存・結果をその場で書き換える。エラーになる金利の手前で止まる
+  function moveRate(v) {
+    var ri = $('rate0'), cur = num(state.rate0);
+    var k = RL.reach(Calc, toInput(state, true), cur, v, ri.min, ri.max);
+    if (k === cur) return false;
+    if (rateHeld) rateHeld = RL.growEnd(rateHeld, k, ri.max);   // 印が端に着いた時だけ、端を広げる
+    state.rate0 = k;
+    ri.value = String(k);
+    fromShare = false;
+    clearTimeout(timer);
+    update();
+    return true;
+  }
+  rateBtn.addEventListener('keydown', function (e) {
+    var d = RL.keyStep(e.key, e.shiftKey);
+    if (!d || !rateZu) return;
+    e.preventDefault();
+    moveRate(num(state.rate0) + d);
+  });
+  rateBtn.addEventListener('focus', function () { if (rateZu) rateHeld = rateZu.xMax; });
+  rateBtn.addEventListener('blur', function () {
+    if (rateDrag) return;
+    rateHeld = 0;
+    renderRateLine();   // 横の端を今の金利に合わせて描き直す
+  });
+  rateBtn.addEventListener('pointerdown', function (e) {
+    if (e.button !== 0 || !rateZu) return;
+    e.preventDefault();
+    this.focus();
+    this.setPointerCapture(e.pointerId);
+    var f = rateZu, rect = $('rate-chart').querySelector('svg').getBoundingClientRect();
+    rateDrag = { id: e.pointerId, f: f, left: rect.left + rect.width * f.L / f.W, width: rect.width * (f.W - f.L - f.R) / f.W, moved: false };
+  });
+  rateBtn.addEventListener('pointermove', function (e) {
+    if (!rateDrag || e.pointerId !== rateDrag.id) return;
+    if (moveRate(RL.rateAtRatio((e.clientX - rateDrag.left) / rateDrag.width, rateDrag.f))) rateDrag.moved = true;
+  });
+  function rateUp(e) {
+    if (!rateDrag || e.pointerId !== rateDrag.id) return;
+    var moved = rateDrag.moved;
+    rateDrag = null;
+    if (moved) { rateHeld = 0; renderRateLine(); }   // 指を離した時に、横の端を今の金利に合わせる
+    rateHeld = rateZu && document.activeElement === rateBtn ? rateZu.xMax : 0;   // フォーカスが残る間は、描き直した端を保つ
+  }
+  rateBtn.addEventListener('pointerup', rateUp);
+  rateBtn.addEventListener('pointercancel', rateUp);
 
   function renderYearTable(res) {
     var s = startYM();
