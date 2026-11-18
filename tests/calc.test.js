@@ -150,14 +150,20 @@ test('当初の金利が 0: 今までどおり 0% で結果を出す', () => {
   assert.equal(round(r.payments[0].payment), round(3000 * MAN / 420));
 });
 
+// main.js の toInput が使う ratesOf と、normalize の金利の行の読み戻しを、main.js の字から取り出して動かす（写さない）
+const mainSrc = require('node:fs').readFileSync(require('node:path').join(__dirname, '..', 'main.js'), 'utf8');
+const num = (v) => { const n = parseFloat(v); return isFinite(n) ? n : 0; };
+const monthIndex = (y, m2) => (y - 1) * 12 + m2;
+function mainRatesOf() {
+  const m = /\n  function ratesOf\(s\) \{\n[\s\S]*?\n  \}\n/.exec(mainSrc);
+  assert.ok(m, 'main.js の ratesOf');
+  assert.ok(/\n      rates: ratesOf\(s\),\n/.test(mainSrc), 'toInput の rates は ratesOf');
+  return new Function('num', 'monthIndex', m[0] + '\nreturn ratesOf;')(num, monthIndex);
+}
+const runMain = (s) => C.simulate(base({ rates: mainRatesOf()(Object.assign({ years: 35, rates: [] }, s)) }));
+
 test('main.js の toInput: 当初の金利の欄が空なら金利を渡さず（num で 0 にしない）結果を出さない。0 は 0% で出す。金利を変える行が在っても同じ', () => {
-  const main = require('node:fs').readFileSync(require('node:path').join(__dirname, '..', 'main.js'), 'utf8');
-  const m = /\n      rates: (String\(s\.rate0\)[^\n]*),\n/.exec(main);
-  assert.ok(m, 'toInput の rates の行');
-  const num = (v) => { const n = parseFloat(v); return isFinite(n) ? n : 0; };
-  const monthIndex = (y, m2) => (y - 1) * 12 + m2;
-  const ratesOf = new Function('s', 'num', 'monthIndex', 'return ' + m[1] + ';');
-  const run = (s) => C.simulate(base({ rates: ratesOf(Object.assign({ rates: [] }, s), num, monthIndex) }));
+  const run = runMain;
   for (const rows of [[], [{ y: 11, m: 1, rate: 2 }]]) {
     for (const rate0 of ['', '  ']) assert.deepEqual(run({ rate0, rates: rows }).errors, ['金利を入れてください。'], JSON.stringify(rate0));
     for (const rate0 of ['0', 0]) {
@@ -167,6 +173,48 @@ test('main.js の toInput: 当初の金利の欄が空なら金利を渡さず�
     }
     assert.equal(round(run({ rate0: 1.0, rates: rows }).payments[0].payment), 84686);
   }
+});
+
+// Q-587: 金利を変える行の金利が空なら、0% として計算しない（当初の金利の空と同じ「金利を入れてください。」で止める）
+test('金利を変える行: 時期だけ入れて金利が空なら結果を出さない', () => {
+  for (const rate of ['', '  ']) {
+    const r = runMain({ rate0: 1.0, rates: [{ y: 6, m: 1, rate }] });
+    assert.deepEqual(r.errors, ['金利を入れてください。'], JSON.stringify(rate));
+    assert.equal(r.payments, undefined);
+  }
+  // 2 行目だけが空でも同じ
+  const r = runMain({ rate0: 1.0, rates: [{ y: 6, m: 1, rate: 2 }, { y: 11, m: 1, rate: '' }] });
+  assert.deepEqual(r.errors, ['金利を入れてください。']);
+});
+
+test('金利を変える行: 0 と入れた時は 0% で計算する', () => {
+  for (const rate of ['0', 0]) {
+    const r = runMain({ rate0: 1.0, rates: [{ y: 6, m: 1, rate }] });
+    assert.deepEqual(r.errors, []);
+    assert.equal(round(r.payments[0].payment), 84686);
+    // 6 年目から利息が付かない: 行の無い時より利息が少ない
+    assert.ok(r.totalInterest < runMain({ rate0: 1.0 }).totalInterest);
+  }
+});
+
+test('金利を変える行: 時期も金利も空の行（時期の欄は 1 年目 1 か月目に寄る）は、今までどおり時期の文で止まる', () => {
+  const r = runMain({ rate0: 1.0, rates: [{ y: 1, m: 1, rate: '' }] });
+  assert.deepEqual(r.errors, ['金利を変える時期は、2 か月目から返済期間の中までにしてください（2 行目）。']);
+  assert.equal(r.payments, undefined);
+  // 金利だけ入れて時期が空の行も同じ（Q-587 の前から）
+  assert.deepEqual(runMain({ rate0: 1.0, rates: [{ y: 1, m: 1, rate: 2 }] }).errors, r.errors);
+});
+
+test('main.js の normalize: 保存した下書きの金利を変える行の空は、読み戻しても空のまま（0 にしない）', () => {
+  const m = /\n    d\.rates = (d\.rates\.slice\(0, 60\)[^\n]*);\n/.exec(mainSrc);
+  assert.ok(m, 'normalize の金利の行');
+  const back = (rates) => new Function('d', 'return ' + m[1] + ';')({ rates: JSON.parse(JSON.stringify(rates)) });
+  assert.deepEqual(back([{ y: 6, m: 1, rate: '' }]), [{ y: 6, m: 1, rate: '' }]);
+  assert.deepEqual(back([{ y: 6, m: 1, rate: '0' }]), [{ y: 6, m: 1, rate: 0 }]);
+  assert.deepEqual(back([{ y: 6, m: 1, rate: '2.5' }]), [{ y: 6, m: 1, rate: 2.5 }]);
+  assert.deepEqual(back([{ y: 6, m: 1 }]), [{ y: 6, m: 1, rate: 0 }]);   // 金利の無い古い形は今までどおり 0
+  // 読み戻した行で計算しても、空は結果を出さない
+  assert.deepEqual(runMain({ rate0: 1.0, rates: back([{ y: 6, m: 1, rate: '' }]) }).errors, ['金利を入れてください。']);
 });
 
 test('借入額: 物件価格 + 諸費用 − 頭金（マイナスにはしない）', () => {

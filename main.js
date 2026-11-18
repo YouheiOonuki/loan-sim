@@ -58,7 +58,8 @@
     Object.keys(d).forEach(function (k) { if (s[k] !== undefined && s[k] !== null) d[k] = s[k]; });
     if (!Array.isArray(d.rates)) d.rates = [];
     if (!Array.isArray(d.prepays)) d.prepays = [];
-    d.rates = d.rates.slice(0, 60).map(function (r) { return { y: +r.y || 1, m: +r.m || 1, rate: +r.rate || 0 }; });
+    // 金利の空は空のまま読み戻す（0 に替えると、次に開いた時に 0% で計算する。Q-587）
+    d.rates = d.rates.slice(0, 60).map(function (r) { return { y: +r.y || 1, m: +r.m || 1, rate: String(r.rate).trim() === '' ? '' : (+r.rate || 0) }; });
     d.prepays = d.prepays.slice(0, 60).map(function (p) {
       return { y: +p.y || 1, m: +p.m || 1, amount: +p.amount || 0, type: p.type === 'reduce' ? 'reduce' : 'shorten' };
     });
@@ -93,14 +94,25 @@
     var costs = s.costsUnit === 'pct' ? price * num(s.costs) / 100 : num(s.costs) * MAN;
     return Calc.loanFromPurchase(price, num(s.down) * MAN, costs);
   }
+  // 金利の欄が空なら金利を渡さない。入れていない金利を 0% として計算せず、calc.js の validate が「金利を入れてください。」で止める
+  // （借入額の空と同じ道。calc.js は root の loan.js の写しなので、空の扱いはここで決める。当初の金利は Q-574、金利を変える行は Q-587）
+  // 変える行の金利の空は、時期が返済期間の中に在る時に見る。時期も空の行（時期の欄は 1 年目 1 か月目に寄る）は、今までどおり時期の文で止まる
+  function ratesOf(s) {
+    var months = Math.round(num(s.years) * 12);
+    var blank = function (v) { return String(v).trim() === ''; };
+    var missing = blank(s.rate0) || s.rates.some(function (r) {
+      var from = monthIndex(r.y, r.m);
+      return blank(r.rate) && from >= 2 && from <= months;
+    });
+    if (missing) return [];
+    return [{ from: 1, rate: num(s.rate0) }].concat(s.rates.map(function (r) { return { from: monthIndex(r.y, r.m), rate: num(r.rate) }; }));
+  }
   function toInput(s, withPrepay) {
     return {
       principal: principalOf(s),
       months: Math.round(num(s.years) * 12),
       method: s.method,
-      // 当初の金利の欄が空なら金利を渡さない。入れていない金利を 0% として計算せず、calc.js の validate が「金利を入れてください。」で止める
-      // （借入額の空と同じ道。calc.js は root の loan.js の写しなので、空の扱いはここで決める。Q-574）
-      rates: String(s.rate0).trim() === '' ? [] : [{ from: 1, rate: num(s.rate0) }].concat(s.rates.map(function (r) { return { from: monthIndex(r.y, r.m), rate: num(r.rate) }; })),
+      rates: ratesOf(s),
       rule5: s.rule5, rule125: s.rule125,
       prepayments: withPrepay ? s.prepays.map(function (p) { return { month: monthIndex(p.y, p.m), amount: num(p.amount) * MAN, type: p.type }; }) : [],
       prepayFee: num(s.fee),
