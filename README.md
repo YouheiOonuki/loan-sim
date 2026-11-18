@@ -46,7 +46,8 @@ yorozu-craft のツールの1つです（共通ルールは [youheioonuki.github
 | `calc.js` | 計算ロジック（画面から切り離した純粋関数）。**生成物**: 正本は youheioonuki.github.io の `tools/common/calc/loan.js`（yorozu-plans D484。seido-keisan のライフプランと同じ計算）。直すときは正本を直して `node tools/sync-common.mjs --calc <このリポジトリ>` で配る（`--check` が違いを落とす） |
 | `constants.js` | 出典と確認日 |
 | `chart-geom.js` | グラフの目盛りと、繰上返済の印の位置・動かせる範囲（純粋関数。範囲は `calc.js` の `simulate` を呼んで取る） |
-| `main.js` | 画面の制御・保存・共有リンク・グラフ・繰上返済の印・比較 |
+| `rate-line.js` | 当初の金利と毎月の返済額の線と、金利の印の位置・動かせる範囲（純粋関数。線の点は `calc.js` の `simulate` を当初の金利だけ変えて呼ぶ。範囲は欄 `#rate0` の min・max） |
+| `main.js` | 画面の制御・保存・共有リンク・グラフ・繰上返済の印・金利の線と印・比較 |
 | `screen.js` | 画面の骨組み（yorozu-plans の SCREEN.md 1.1）の共通部品: 「くわしく入れる」の summary の更新と上端の固定バー（seido-keisan の `lib/screen.js` と同じ中身） |
 | `style.css` | 見た目（和紙風の配色、ダークモード対応） |
 | `404.html` | ツール配下の存在しない URL で出るページ（サイト共通のもの） |
@@ -54,6 +55,7 @@ yorozu-craft のツールの1つです（共通ルールは [youheioonuki.github
 | `sitemap.xml` | サイトマップ（robots.txt はドメイン直下で管理） |
 | `tests/calc.test.js` | 計算のテスト（`node --test tests/*.test.js`。`.github/workflows/test.yml` で push・PR のたびに自動実行） |
 | `tests/chart-geom.test.js` | 繰上返済の印の位置 ＝ 行の時期、月の境、範囲の端、行が 0、同じ月の 2 つ |
+| `tests/rate-line.test.js` | 金利の線の高さ ＝ 結果の毎月の返済額、印の位置 ＝ 欄の値、きざみと欄の step、保つ間の目盛り、エラーの手前で止まる |
 | `tests/backup.test.js` | 保存内容のファイルへの書き出し・読み込み（`calc.js` の `buildBackup` / `parseBackup`）のテスト |
 
 ## ライセンス

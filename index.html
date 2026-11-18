@@ -205,6 +205,11 @@
       <div id="panel-chart" role="tabpanel" aria-labelledby="tab-chart">
         <div id="chart" class="chart"><div id="marks" class="marks"></div></div>
         <p class="legend"><span class="lg lg-a"></span>今の条件 <span class="lg lg-b" id="lg-b"></span><span id="lg-b-text">繰上返済なし</span></p>
+        <!-- 当初の金利と毎月の返済額の線（Q-558）。印を左右に引く・← → で当初の金利の欄を変える。画面だけ（紙に出さない） -->
+        <div id="rate-fig" class="rate-fig no-print" hidden>
+          <h3 id="h-rate">金利と毎月の返済額</h3>
+          <div id="rate-chart" class="chart"><button type="button" class="mark" id="rate-mark" aria-keyshortcuts="ArrowLeft ArrowRight Shift+ArrowLeft Shift+ArrowRight"><span class="mark-dot" aria-hidden="true"></span></button></div>
+        </div>
       </div>
       <div id="panel-table" role="tabpanel" aria-labelledby="tab-table" hidden>
         <div class="table-wrap" tabindex="0">
@@ -289,6 +294,7 @@
   <script src="./constants.js"></script>
   <script src="./calc.js"></script>
   <script src="./chart-geom.js"></script>
+  <script src="./rate-line.js"></script>
   <script src="./screen.js"></script>
   <script src="./reset-storage.js"></script>
   <script src="./main.js"></script>

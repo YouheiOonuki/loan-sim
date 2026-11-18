@@ -181,6 +181,10 @@ label.inline input { width: 1.4rem; height: 1.4rem; accent-color: var(--accent);
 .legend { font-size: var(--fs-s); color: var(--muted); display: flex; align-items: center; gap: var(--sp-2); flex-wrap: wrap; }
 .lg { display: inline-block; width: 1.6rem; height: 0; border-top: 3px solid var(--accent); }
 .lg-b { border-top: 2px dashed var(--muted); margin-left: var(--sp-3); }
+/* 当初の金利と毎月の返済額の線（Q-558）。印は繰上返済の印と同じ .mark（当たり 44px） */
+.rate-fig { margin-top: var(--sp-6); }
+.rate-fig h3 { font-size: var(--fs-m); margin-bottom: var(--sp-2); }
+.chart .pick { fill: var(--text); font-size: 22px; font-weight: 700; }
 
 .scn-list { list-style: none; margin: var(--sp-2) 0; }
 .scn-list li { display: flex; align-items: center; gap: var(--sp-2); padding: var(--sp-1) 0; border-bottom: 1px dashed var(--border); }
