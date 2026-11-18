@@ -98,7 +98,8 @@
       principal: principalOf(s),
       months: Math.round(num(s.years) * 12),
       method: s.method,
-      rates: [{ from: 1, rate: num(s.rate0) }].concat(s.rates.map(function (r) { return { from: monthIndex(r.y, r.m), rate: num(r.rate) }; })),
+      // 当初の金利の欄が空なら NaN（入れていない金利を 0% として計算しない。calc.js の validate が止める。Q-574）
+      rates: [{ from: 1, rate: String(s.rate0).trim() === '' ? NaN : num(s.rate0) }].concat(s.rates.map(function (r) { return { from: monthIndex(r.y, r.m), rate: num(r.rate) }; })),
       rule5: s.rule5, rule125: s.rule125,
       prepayments: withPrepay ? s.prepays.map(function (p) { return { month: monthIndex(p.y, p.m), amount: num(p.amount) * MAN, type: p.type }; }) : [],
       prepayFee: num(s.fee),

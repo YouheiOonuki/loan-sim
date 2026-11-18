@@ -47,9 +47,11 @@
     if (!(input.principal > 0)) e.push('借入額を 0 より大きくしてください。');
     if (!(input.months >= 1 && input.months <= 600)) e.push('返済期間は 1〜50 年にしてください。');
     var rates = input.rates || [];
-    if (!rates.length) e.push('金利を入れてください。');
+    // 当初の金利（1 行目）が NaN ＝ 欄が空。0% として計算せず、入れるよう言う（Q-574）
+    var noRate = !rates.length || Number.isNaN(rates[0].rate);
+    if (noRate) e.push('金利を入れてください。');
     rates.forEach(function (x, i) {
-      if (!(x.rate >= 0 && x.rate <= 20)) e.push('金利は 0〜20% にしてください（' + (i + 1) + ' 行目）。');
+      if (!(i === 0 && noRate) && !(x.rate >= 0 && x.rate <= 20)) e.push('金利は 0〜20% にしてください（' + (i + 1) + ' 行目）。');
       if (i > 0 && !(x.from >= 2 && x.from <= input.months)) e.push('金利を変える時期は、2 か月目から返済期間の中までにしてください（' + (i + 1) + ' 行目）。');
     });
     (input.prepayments || []).forEach(function (p, i) {
