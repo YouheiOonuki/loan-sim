@@ -442,12 +442,13 @@
     });
   }
 
-  // i 行目の時期を k か月目にして、欄・保存・結果をその場で書き換える。
-  // その 1 歩の先で計算がエラーになるなら、その 1 歩を取り消す（欄・保存・結果・印は 1 歩前のまま。Q-413）
+  // i 行目の時期を k か月目へ向けて動かし、欄・保存・結果をその場で書き換える。
+  // 動けるのは、今の月から 1 か月ずつたどって計算がエラーにならない月が続く所まで（引く・← →・Shift とも。Q-413・Q-433）
   function moveMark(i, k) {
     var row = state.prepays[i];
     if (!row || monthIndex(row.y, row.m) === k) return;
-    if (!Geom.canMove(Calc, toInput(state, true), i, k)) return;
+    k = Geom.reach(Calc, toInput(state, true), i, k);
+    if (monthIndex(row.y, row.m) === k) return;
     var ym = Geom.yearMonthOf(k);
     row.y = ym.y; row.m = ym.m;
     var div = $('pre-rows').children[i];
