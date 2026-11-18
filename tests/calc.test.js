@@ -135,6 +135,40 @@ test('入力の検査', () => {
   assert.ok(C.simulate(base({ rates: [{ from: 1, rate: 1 }, { from: 500, rate: 2 }] })).errors.length);
 });
 
+// Q-574: 当初の金利の欄が空（main.js の toInput が金利を渡さない）なら、0% の結果を出さない。0 と入れた時は 0% で出す
+test('当初の金利が空: 結果を出さず「金利を入れてください。」だけ', () => {
+  const r = C.simulate(base({ rates: [] }));
+  assert.deepEqual(r.errors, ['金利を入れてください。']);
+  assert.deepEqual(r.rows, []);
+  assert.equal(r.payments, undefined);
+});
+
+test('当初の金利が 0: 今までどおり 0% で結果を出す', () => {
+  const r = C.simulate(base({ rates: [{ from: 1, rate: 0 }] }));
+  assert.deepEqual(r.errors, []);
+  assert.equal(r.totalInterest, 0);
+  assert.equal(round(r.payments[0].payment), round(3000 * MAN / 420));
+});
+
+test('main.js の toInput: 当初の金利の欄が空なら金利を渡さず（num で 0 にしない）結果を出さない。0 は 0% で出す。金利を変える行が在っても同じ', () => {
+  const main = require('node:fs').readFileSync(require('node:path').join(__dirname, '..', 'main.js'), 'utf8');
+  const m = /\n      rates: (String\(s\.rate0\)[^\n]*),\n/.exec(main);
+  assert.ok(m, 'toInput の rates の行');
+  const num = (v) => { const n = parseFloat(v); return isFinite(n) ? n : 0; };
+  const monthIndex = (y, m2) => (y - 1) * 12 + m2;
+  const ratesOf = new Function('s', 'num', 'monthIndex', 'return ' + m[1] + ';');
+  const run = (s) => C.simulate(base({ rates: ratesOf(Object.assign({ rates: [] }, s), num, monthIndex) }));
+  for (const rows of [[], [{ y: 11, m: 1, rate: 2 }]]) {
+    for (const rate0 of ['', '  ']) assert.deepEqual(run({ rate0, rates: rows }).errors, ['金利を入れてください。'], JSON.stringify(rate0));
+    for (const rate0 of ['0', 0]) {
+      const r = run({ rate0, rates: rows });
+      assert.deepEqual(r.errors, []);
+      assert.equal(round(r.payments[0].payment), round(3000 * MAN / 420));
+    }
+    assert.equal(round(run({ rate0: 1.0, rates: rows }).payments[0].payment), 84686);
+  }
+});
+
 test('借入額: 物件価格 + 諸費用 − 頭金（マイナスにはしない）', () => {
   assert.equal(C.loanFromPurchase(4000 * MAN, 500 * MAN, 200 * MAN), 3700 * MAN);
   assert.equal(C.loanFromPurchase(1000, 2000, 0), 0);
