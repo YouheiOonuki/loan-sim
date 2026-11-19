@@ -115,6 +115,7 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 fieldset.field { border: none; }
 fieldset.field legend { font-weight: 700; margin-bottom: var(--sp-1); }
 label.inline { display: flex; align-items: center; gap: var(--sp-2); font-weight: 400; min-height: var(--tap); }
+label.inline + label.inline { margin-top: var(--sp-2); }
 label.inline input { width: 1.4rem; height: 1.4rem; accent-color: var(--accent); }
 .rules.is-disabled label.inline { opacity: 0.5; }
 
@@ -156,7 +157,7 @@ label.inline input { width: 1.4rem; height: 1.4rem; accent-color: var(--accent);
 #effect .tbl th, #effect .tbl td { padding: var(--sp-1); }
 .tbl td.diff { color: var(--accent); font-weight: 800; }
 
-.tabs { display: flex; gap: var(--sp-1); border-bottom: 1px solid var(--border); margin-bottom: var(--sp-3); }
+.tabs { display: flex; gap: var(--sp-2); border-bottom: 1px solid var(--border); margin-bottom: var(--sp-3); }
 .tabs button { background: none; border: none; border-bottom: 3px solid transparent; border-radius: 0; padding: 0 var(--sp-3); color: var(--muted); }
 .tabs button[aria-selected="true"] { color: var(--accent); border-bottom-color: var(--accent); }
 
