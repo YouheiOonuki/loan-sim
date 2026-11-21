@@ -33,6 +33,7 @@ yorozu-craft のツールの1つです（共通ルールは [youheioonuki.github
 | 時期 | 確認すること | 直す場所 |
 |------|------------|---------|
 | 年 1 回（画面に注意が出る前。`STALE_MONTHS` = 12 か月） | 出典のページがあるか、5 年ルール・125% ルール・未払利息の一般的な説明が変わっていないか | `constants.js` の `SOURCES`・`CHECKED` |
+| 月 1 回（`jgbcm_all.csv` は前の月の末までを持つ） | 金利の今と昔の写しを作り直す: `node tools/kinri-data.js` → `node --test tests/*.test.js` が通ったら commit（CSV は保存しない） | `kinri/data/*.json`（道具が書く） |
 | 住宅ローン控除などフェーズ 2 を足すとき | 制度の値（入居年×住宅区分）と出典 | `constants.js` に表として追加 |
 
 値や計算を直したら、`guide.html` の「更新履歴」に日付と内容を 1 行足す。
@@ -56,6 +57,9 @@ yorozu-craft のツールの1つです（共通ルールは [youheioonuki.github
 | `tests/calc.test.js` | 計算のテスト（`node --test tests/*.test.js`。`.github/workflows/test.yml` で push・PR のたびに自動実行） |
 | `tests/chart-geom.test.js` | 繰上返済の印の位置 ＝ 行の時期、月の境、範囲の端、行が 0、同じ月の 2 つ |
 | `tests/rate-line.test.js` | 金利の線の高さ ＝ 結果の毎月の返済額、印の位置 ＝ 欄の値、きざみと欄の step、保つ間の目盛り、エラーの手前で止まる |
+| `kinri/series.js` | 金利の今と昔（K245）の計算: 系列を月にそろえる・年の印・図に渡す点・財務省の国債金利の CSV を読む（純粋関数。`tests/kinri.test.js`） |
+| `kinri/data/jgb.json` / `kinri/data/cpi.json` | 財務省の国債金利（年限ごとの月末の値）と統計局の消費者物価指数（全国・総合の月の値）の写し。出典・取った日・「加工して作成」を中に持つ。**生成物**（作り直し方は「保守」。`tests/kinri-data.test.js`） |
+| `tools/kinri-data.js` | 上の写しを作る道具（`jgbcm_all.csv`・`zmi2020aa.csv` を 1 回ずつ取る） |
 | `tests/backup.test.js` | 保存内容のファイルへの書き出し・読み込み（`calc.js` の `buildBackup` / `parseBackup`）のテスト |
 
 ## ライセンス
