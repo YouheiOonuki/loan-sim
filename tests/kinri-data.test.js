@@ -1,4 +1,4 @@
-// 金利の今と昔（K245、Q-805）: repo に持つ月末の値の写し（kinri/data/*.json）と、写しを作る道具（tools/kinri-data.js）の読む所
+// 金利の今と昔（K245、Q-805・Q-840）: repo に持つ月末の値の写し（kinri/data/*.json）と、写しを作る道具（tools/kinri-data.js）の読む所
 // 写しのテストは、道具が書いた実の JSON を読む（外の口には何も送らない）。道具の読む所のテストの値は作った物（形だけ）
 const test = require('node:test');
 const assert = require('node:assert/strict');
@@ -11,15 +11,28 @@ function ymNum(ym) { return Number(ym.slice(0, 4)) * 12 + Number(ym.slice(5, 7))
 function at(months, ym) { return months.find((m) => m.ym === ym); }
 const TENORS = ['1年', '2年', '3年', '4年', '5年', '6年', '7年', '8年', '9年', '10年', '15年', '20年', '25年', '30年', '40年'];
 
-test('写し: 出典の名前・URL・PDL1.0・取った日・「加工して作成」が在る', () => {
+test('写し: 出典の名前・URL・規約の名前・取った日・「加工して作成」が在る', () => {
   for (const d of [JGB, CPI]) {
     assert.ok(d.source.name && /^https:\/\//.test(d.source.url) && /^https:\/\//.test(d.source.page), d.source.name);
-    assert.match(d.source.license, /PDL1\.0/);
+    assert.ok(d.source.license, d.source.name);
     assert.match(d.fetched, /^\d{4}-\d{2}-\d{2}$/);
     assert.ok(d.credit.startsWith(d.source.name) && d.credit.endsWith('を加工して作成'), d.credit);
   }
+  // 規約の名前は出どころが名乗る名前のまま（D659）: 財務省は PDL1.0、e-Stat は e-Stat の利用規約（PDL1.0 と書かない）
+  assert.match(JGB.source.license, /PDL1\.0/);
+  assert.equal(CPI.source.license, '政府統計の総合窓口（e-Stat）利用規約');
+  assert.equal(CPI.source.terms, 'https://www.e-stat.go.jp/terms-of-use');
+  assert.doesNotMatch(JSON.stringify(CPI.source) + CPI.credit, /PDL|公共データ利用規約/);
+  assert.ok(CPI.credit.includes(CPI.source.table), CPI.credit);
   assert.equal(JGB.kind, 'rate');
   assert.equal(CPI.kind, 'index');
+});
+
+test('README の出典の行は、写しの「加工して作成」の字と規約の名前と同じ', () => {
+  const readme = require('node:fs').readFileSync(require('node:path').join(__dirname, '..', 'README.md'), 'utf8');
+  for (const d of [JGB, CPI]) {
+    assert.ok(readme.includes(d.credit + '。' + d.source.license), d.source.name);
+  }
 });
 
 test('国債金利: 年限は 15（1〜10 年・15・20・25・30・40 年）', () => {
@@ -59,14 +72,25 @@ test('国債金利: 年を渡すと、その年で最後に値の在る月の値
   assert.ok(K.yearMark([one], 1979)[0].none);
 });
 
-test('物価指数: 総合の月の値が 2020-01 から取った月の前の月あたりまで欠けず並ぶ', () => {
+test('物価指数: 総合の月の値が 1970-01 から取った月の前の月あたりまで欠けず並ぶ（出どころは e-Stat の 1 つ）', () => {
   assert.equal(CPI.unit, '2020年=100');
+  assert.match(CPI.source.url, /^https:\/\/www\.e-stat\.go\.jp\//);
   assert.deepEqual(CPI.series.map((s) => s.name), ['総合']);
   const m = CPI.series[0].months, fetched = ymNum(CPI.fetched.slice(0, 7));
-  assert.equal(m[0].ym, '2020-01');
-  m.forEach((x, i) => { assert.equal(ymNum(x.ym), ymNum('2020-01') + i, x.ym); assert.ok(Number.isFinite(x.value), x.ym); });
+  assert.equal(m[0].ym, '1970-01');
+  m.forEach((x, i) => { assert.equal(ymNum(x.ym), ymNum('1970-01') + i, x.ym); assert.ok(Number.isFinite(x.value), x.ym); });
   const last = ymNum(m.at(-1).ym);
   assert.ok(last <= fetched && last >= fetched - 2, '最後の月 ' + m.at(-1).ym);
+});
+
+test('物価指数: 前年同月比は 1971-01 から（1970 年は null）、12 か月前の値との比', () => {
+  const m = CPI.series[0].months;
+  assert.equal(m.find((x) => x.yoy !== null).ym, '1971-01');
+  m.slice(0, 12).forEach((x) => assert.equal(x.yoy, null, x.ym));
+  m.slice(12).forEach((x, i) => {
+    assert.ok(Number.isFinite(x.yoy), x.ym);
+    assert.ok(Math.abs(x.yoy - (x.value / m[i].value - 1) * 100) < 0.001, x.ym);
+  });
 });
 
 test('道具: 物価指数の年月の欄を読む', () => {
@@ -96,9 +120,34 @@ test('道具: 物価指数の CSV から「総合」の列を月の値に（見�
   assert.equal(T.parseCpiCsv('類・品目,総合\n', '総合'), null);
 });
 
-test('道具: 読めない CSV からは写しを作らない', () => {
+test('道具: 読めない CSV と、値の無い月が在る CSV からは写しを作らない', () => {
   assert.equal(T.buildJgb('表題だけ\n', '2026-01-01'), null);
   assert.equal(T.buildCpi('表題だけ\n', '2026-01-01'), null);
+  assert.equal(T.buildCpi(CPI_CSV, '2026-01-01'), null);   // 2020-03・2020-04 が欠けている
+});
+
+test('道具: 物価の CSV から写しを作ると、前年同月比は 13 か月目から', () => {
+  const rows = [];
+  for (let i = 0; i < 14; i++) rows.push((2020 + Math.floor(i / 12)) + String(i % 12 + 1).padStart(2, '0') + ',' + (100 + i));
+  const d = T.buildCpi('類・品目,総　合\n' + rows.join('\n') + '\n', '2026-01-01');
+  const m = d.series[0].months;
+  assert.equal(m.length, 14);
+  assert.equal(m[11].yoy, null);
+  assert.equal(m[12].ym, '2021-01');
+  assert.equal(m[12].yoy, 12);   // 112 / 100
+  assert.equal(m[13].yoy, Math.round((113 / 101 - 1) * 100 * 1000) / 1000);
+});
+
+test('道具: 引数は無し（両方）・jgb・cpi（物価だけ。金利の側は取りに行かない）', () => {
+  assert.deepEqual(T.planOf(undefined), ['jgb', 'cpi']);
+  assert.deepEqual(T.planOf('cpi'), ['cpi']);
+  assert.deepEqual(T.planOf('jgb'), ['jgb']);
+  assert.equal(T.planOf('all'), null);
+});
+
+test('道具: 文字コードは UTF-8 で読めれば UTF-8、読めなければ Shift_JIS', () => {
+  assert.equal(T.decode(new TextEncoder().encode('総合')), '総合');
+  assert.equal(T.decode(Uint8Array.from([0x91, 0x8d, 0x8d, 0x87])), '総合');   // Shift_JIS の「総合」
 });
 
 test('道具: 書く JSON は 1 か月 1 行で、読み戻すと同じ', () => {
