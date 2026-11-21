@@ -1,0 +1,11 @@
+{
+  "src": "reset-storage.js",
+  "prefixes": [
+    "loan-sim_"
+  ],
+  "legacy": [],
+  "pagePrefixes": {},
+  "pageLegacy": {},
+  "inline": [],
+  "skipDirs": []
+}
