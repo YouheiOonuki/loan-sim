@@ -79,9 +79,10 @@
     return out;
   }
 
+  /** その年（year を省くと系列全体）で最後に値の在る月 { ym, value }。無ければ null */
   function lastIn(months, year) {
     var v = null;
-    (months || []).forEach(function (m) { if ((year === undefined || Number(m.ym.slice(0, 4)) === year) && has(m.value)) v = m.value; });
+    (months || []).forEach(function (m) { if ((year === undefined || Number(m.ym.slice(0, 4)) === year) && has(m.value)) v = m; });
     return v;
   }
   function r(v) { return Math.round(v * 1e9) / 1e9; }
@@ -89,16 +90,20 @@
   /**
    * 入れた年の、各系列の値と、今の値との差。
    * 系列: { name, kind: 'rate'（差はポイント）| 'index'（差は比）, months: toMonthEnd の結果 }
-   * その年の値 ＝ その年の最後の値の在る月の値。今の値 ＝ 系列の最後の値の在る月の値。
-   * その年の値が無い系列は { name, kind, none: true }
+   * その年の値 ＝ その年の最後の値の在る月の値（その月が thenYm）。今の値 ＝ 系列の最後の値の在る月の値（その月が nowYm）。
+   * その年の値が無い系列は { name, kind, none: true, from: 系列で最初に値の在る月（無ければ null） }
    */
   function yearMark(list, year) {
     return (list || []).map(function (s) {
       var then = lastIn(s.months, year), now = lastIn(s.months);
-      if (then === null || now === null) return { name: s.name, kind: s.kind, none: true };
-      var out = { name: s.name, kind: s.kind, then: then, now: now };
-      if (s.kind === 'index') out.ratio = then === 0 ? null : r(now / then);
-      else out.points = r(now - then);
+      if (then === null || now === null) {
+        var first = null;
+        (s.months || []).some(function (m) { if (has(m.value)) { first = m.ym; return true; } return false; });
+        return { name: s.name, kind: s.kind, none: true, from: first };
+      }
+      var out = { name: s.name, kind: s.kind, then: then.value, thenYm: then.ym, now: now.value, nowYm: now.ym };
+      if (s.kind === 'index') out.ratio = then.value === 0 ? null : r(now.value / then.value);
+      else out.points = r(now.value - then.value);
       return out;
     });
   }

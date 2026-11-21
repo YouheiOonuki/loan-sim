@@ -57,6 +57,7 @@ yorozu-craft のツールの1つです（共通ルールは [youheioonuki.github
 | `tests/calc.test.js` | 計算のテスト（`node --test tests/*.test.js`。`.github/workflows/test.yml` で push・PR のたびに自動実行） |
 | `tests/chart-geom.test.js` | 繰上返済の印の位置 ＝ 行の時期、月の境、範囲の端、行が 0、同じ月の 2 つ |
 | `tests/rate-line.test.js` | 金利の線の高さ ＝ 結果の毎月の返済額、印の位置 ＝ 欄の値、きざみと欄の step、保つ間の目盛り、エラーの手前で止まる |
+| `kinri/index.html` / `kinri/app.js` | 金利の今と昔（K245）の画面: 国債金利（10 年・2 年・30 年を押して替える）と物価の前年比を 1 枚の図に重ね、年を 1 つ入れるとその年の値・いま・差を出す。データは `kinri/data/*.json` だけを読む（外の口に送らない）。年を入れた時に出す物は `tests/kinri-app.test.js` |
 | `kinri/series.js` | 金利の今と昔（K245）の計算: 系列を月にそろえる・年の印・図に渡す点・財務省の国債金利の CSV を読む（純粋関数。`tests/kinri.test.js`） |
 | `kinri/data/jgb.json` / `kinri/data/cpi.json` | 国債金利（10 年・2 年・30 年の月末の値。年限ごとに最初に値の在る月から。配る年限の並びは `tools/kinri-data.js` の `TENORS`）と消費者物価指数（全国・総合の月の値と前年同月比、1970 年 1 月から）の写し。出典・規約の名前・取った日・「加工して作成」を中に持つ。**生成物**（作り直し方は「保守」。`tests/kinri-data.test.js`） |
 | `tools/kinri-data.js` | 上の写しを作る道具（`jgbcm_all.csv` と e-Stat の物価の長期時系列の CSV を 1 回ずつ取る） |
