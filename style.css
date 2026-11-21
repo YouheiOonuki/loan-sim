@@ -158,7 +158,7 @@ label.inline input { width: 1.4rem; height: 1.4rem; accent-color: var(--accent);
 .tbl td.diff { color: var(--accent); font-weight: 800; }
 
 .tabs { display: flex; gap: var(--sp-2); border-bottom: 1px solid var(--border); margin-bottom: var(--sp-3); }
-.tabs button { background: none; border: none; border-bottom: 3px solid transparent; border-radius: 0; padding: 0 var(--sp-3); color: var(--muted); }
+.tabs button { background: none; border: none; border-bottom: 3px solid transparent; padding: 0 var(--sp-3); color: var(--muted); }
 .tabs button[aria-selected="true"] { color: var(--accent); border-bottom-color: var(--accent); }
 
 .chart svg { width: 100%; height: auto; display: block; }
