@@ -28,6 +28,8 @@ const SOURCES = {
     page: 'https://www.e-stat.go.jp/',
     license: '政府統計の総合窓口（e-Stat）利用規約',
     terms: 'https://www.e-stat.go.jp/terms-of-use',
+    // この表（zmi2020s.csv）は指数だけを持ち、前年同月比の項目が無い。前年同月比は指数から計算し、出典の行にそう書く（yorozu-plans Q-903、D694）
+    note: '前年同月比は指数から計算',
   },
 };
 
@@ -68,7 +70,7 @@ function parseCpiCsv(text, name) {
   return Kinri.toMonthEnd(pts);
 }
 
-function attribution(src) { return src.name + (src.table ? src.table : '') + '（' + src.page + '）を加工して作成'; }
+function attribution(src) { return src.name + (src.table ? src.table : '') + '（' + src.page + '）を加工して作成' + (src.note ? '（' + src.note + '）' : ''); }
 
 /** 月の値に前年同月比（%）を足す。12 か月前の値が無い月（系列の 1 年目を含む）は null */
 function withYoy(months) {

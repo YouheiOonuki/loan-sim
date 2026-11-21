@@ -15,7 +15,7 @@ test('写し: 出典の名前・URL・規約の名前・取った日・「加工
     assert.ok(d.source.name && /^https:\/\//.test(d.source.url) && /^https:\/\//.test(d.source.page), d.source.name);
     assert.ok(d.source.license, d.source.name);
     assert.match(d.fetched, /^\d{4}-\d{2}-\d{2}$/);
-    assert.ok(d.credit.startsWith(d.source.name) && d.credit.endsWith('を加工して作成'), d.credit);
+    assert.ok(d.credit.startsWith(d.source.name) && /を加工して作成(（[^（）]+）)?$/.test(d.credit), d.credit);
   }
   // 規約の名前は出どころが名乗る名前のまま（D659）: 財務省は PDL1.0、e-Stat は e-Stat の利用規約（PDL1.0 と書かない）
   assert.match(JGB.source.license, /PDL1\.0/);
@@ -23,6 +23,9 @@ test('写し: 出典の名前・URL・規約の名前・取った日・「加工
   assert.equal(CPI.source.terms, 'https://www.e-stat.go.jp/terms-of-use');
   assert.doesNotMatch(JSON.stringify(CPI.source) + CPI.credit, /PDL|公共データ利用規約/);
   assert.ok(CPI.credit.includes(CPI.source.table), CPI.credit);
+  // 表に前年同月比の項目が無いので、前年同月比は指数から計算し、出典の行にそう書く（Q-903、D694）。金利の側には足さない
+  assert.ok(CPI.credit.endsWith('を加工して作成（前年同月比は指数から計算）'), CPI.credit);
+  assert.ok(JGB.credit.endsWith('を加工して作成'), JGB.credit);
   assert.equal(JGB.kind, 'rate');
   assert.equal(CPI.kind, 'index');
 });
@@ -139,6 +142,7 @@ test('道具: 物価の CSV から写しを作ると、前年同月比は 13 か
   assert.equal(m[12].ym, '2021-01');
   assert.equal(m[12].yoy, 12);   // 112 / 100
   assert.equal(m[13].yoy, Math.round((113 / 101 - 1) * 100 * 1000) / 1000);
+  assert.equal(d.credit, CPI.credit);   // 道具が書く出典の行と、写しの出典の行は同じ字（Q-903）
 });
 
 test('道具: 引数は無し（両方）・jgb・cpi（物価だけ。金利の側は取りに行かない）', () => {

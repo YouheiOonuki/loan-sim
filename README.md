@@ -65,7 +65,7 @@ yorozu-craft のツールの1つです（共通ルールは [youheioonuki.github
 金利の今と昔の写しの出典（規約の名前は、出どころが名乗る名前のまま）:
 
 - 国債金利: 財務省「国債金利情報」（https://www.mof.go.jp/jgbs/reference/interest_rate/index.htm）を加工して作成。公共データ利用規約（第1.0版）（PDL1.0）
-- 物価: 政府統計の総合窓口（e-Stat）総務省統計局「2020年基準消費者物価指数 長期時系列 品目別価格指数 全国 月次 中分類指数（1970年1月～最新月）」（https://www.e-stat.go.jp/）を加工して作成。政府統計の総合窓口（e-Stat）利用規約（https://www.e-stat.go.jp/terms-of-use）
+- 物価: 政府統計の総合窓口（e-Stat）総務省統計局「2020年基準消費者物価指数 長期時系列 品目別価格指数 全国 月次 中分類指数（1970年1月～最新月）」（https://www.e-stat.go.jp/）を加工して作成（前年同月比は指数から計算）。政府統計の総合窓口（e-Stat）利用規約（https://www.e-stat.go.jp/terms-of-use）
 - 取った日は `kinri/data/*.json` の `fetched`
 
 ## ライセンス
