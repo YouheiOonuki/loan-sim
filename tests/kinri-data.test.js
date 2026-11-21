@@ -9,7 +9,6 @@ const CPI = require('../kinri/data/cpi.json');
 
 function ymNum(ym) { return Number(ym.slice(0, 4)) * 12 + Number(ym.slice(5, 7)) - 1; }
 function at(months, ym) { return months.find((m) => m.ym === ym); }
-const TENORS = ['1年', '2年', '3年', '4年', '5年', '6年', '7年', '8年', '9年', '10年', '15年', '20年', '25年', '30年', '40年'];
 
 test('写し: 出典の名前・URL・規約の名前・取った日・「加工して作成」が在る', () => {
   for (const d of [JGB, CPI]) {
@@ -35,41 +34,44 @@ test('README の出典の行は、写しの「加工して作成」の字と規�
   }
 });
 
-test('国債金利: 年限は 15（1〜10 年・15・20・25・30・40 年）', () => {
-  assert.deepEqual(JGB.series.map((s) => s.name), TENORS);
+test('国債金利: 配る年限は 3 つ（10 年・2 年・30 年）で、並びは道具の TENORS', () => {
+  assert.deepEqual(T.TENORS, ['10年', '2年', '30年']);
+  assert.deepEqual(JGB.series.map((s) => s.name), T.TENORS);
 });
 
-test('国債金利: どの年限も 1974-09 から取った月の前の月あたりまで、月が欠けず並ぶ', () => {
+test('国債金利: 年限ごとに最初に値の在る月から、取った月の前の月あたりまで、月が欠けず並ぶ（10 年は 1986-07、2 年は 1974-09、30 年は 1999-09）', () => {
   const fetched = ymNum(JGB.fetched.slice(0, 7));
+  const first = { '10年': '1986-07', '2年': '1974-09', '30年': '1999-09' };
   for (const s of JGB.series) {
-    assert.equal(s.months[0].ym, '1974-09', s.name);
-    s.months.forEach((m, i) => assert.equal(ymNum(m.ym), ymNum('1974-09') + i, s.name + ' ' + m.ym));
+    assert.equal(s.months[0].ym, first[s.name], s.name);
+    assert.equal(typeof s.months[0].value, 'number', s.name);
+    s.months.forEach((m, i) => assert.equal(ymNum(m.ym), ymNum(first[s.name]) + i, s.name + ' ' + m.ym));
     const last = ymNum(s.months.at(-1).ym);
     assert.ok(last <= fetched && last >= fetched - 2, s.name + ' の最後の月 ' + s.months.at(-1).ym);   // jgbcm_all.csv は前の月の末までを持つ
-    assert.equal(s.months.length, JGB.series[0].months.length, s.name);
+    assert.equal(s.months.at(-1).ym, JGB.series[0].months.at(-1).ym, s.name);
+    for (const m of s.months) assert.ok(m.value === null || Number.isFinite(m.value), s.name + ' ' + m.ym);
   }
 });
 
-test('国債金利: 欠けの - は null（10 年は 1986-07 から、40 年は 2007-11 から値が在る）', () => {
-  const ten = JGB.series[9].months, forty = JGB.series[14].months;
-  assert.equal(at(ten, '1986-06').value, null);
-  assert.equal(typeof at(ten, '1986-07').value, 'number');
-  assert.equal(at(forty, '1990-01').value, null);
-  assert.equal(at(forty, '2007-10').value, null);
-  assert.equal(typeof at(forty, '2007-11').value, 'number');
-  for (const s of JGB.series) for (const m of s.months) assert.ok(m.value === null || Number.isFinite(m.value), s.name + ' ' + m.ym);
+test('国債金利: 値の無い年を渡すと、値でなく「無い」が返る（10 年の 1985 年・30 年の 1998 年）', () => {
+  const ten = { name: '10年', kind: 'rate', months: JGB.series[0].months };
+  const thirty = { name: '30年', kind: 'rate', months: JGB.series[2].months };
+  assert.deepEqual(K.yearMark([ten], 1985)[0], { name: '10年', kind: 'rate', none: true });
+  assert.deepEqual(K.yearMark([thirty], 1998)[0], { name: '30年', kind: 'rate', none: true });
+  assert.equal(typeof K.yearMark([ten], 1986)[0].then, 'number');
 });
 
 test('国債金利: 年を渡すと、その年で最後に値の在る月の値が返る（12 月が欠けた年は前の月）', () => {
-  const ten = { name: '10年', kind: 'rate', months: JGB.series[9].months };
+  const ten = { name: '10年', kind: 'rate', months: JGB.series[0].months };
   const r = K.yearMark([ten], 2021)[0];
   assert.equal(r.then, at(ten.months, '2021-12').value);
   assert.equal(r.now, ten.months.at(-1).value);
-  // 1 年の 1978-06〜1980-07 は CSV が - だけ。1978 年の値は 1978-05 の値
-  const one = { name: '1年', kind: 'rate', months: JGB.series[0].months };
-  assert.equal(at(one.months, '1978-12').value, null);
-  assert.equal(K.yearMark([one], 1978)[0].then, at(one.months, '1978-05').value);
-  assert.ok(K.yearMark([one], 1979)[0].none);
+  // 2 年の 1978-06〜1979-07 は CSV が - だけ（間の値の無い月は null で残す）。1978 年の値は 1978-05 の値
+  const two = { name: '2年', kind: 'rate', months: JGB.series[1].months };
+  assert.equal(at(two.months, '1978-12').value, null);
+  assert.equal(at(two.months, '1979-07').value, null);
+  assert.equal(K.yearMark([two], 1978)[0].then, at(two.months, '1978-05').value);
+  assert.equal(K.yearMark([two], 1979)[0].then, at(two.months, '1979-12').value);
 });
 
 test('物価指数: 総合の月の値が 1970-01 から取った月の前の月あたりまで欠けず並ぶ（出どころは e-Stat の 1 つ）', () => {
@@ -122,6 +124,7 @@ test('道具: 物価指数の CSV から「総合」の列を月の値に（見�
 
 test('道具: 読めない CSV と、値の無い月が在る CSV からは写しを作らない', () => {
   assert.equal(T.buildJgb('表題だけ\n', '2026-01-01'), null);
+  assert.equal(T.buildJgb('表,,\n基準日,1年,10年\nS49.9.24,8.1,7.8\n', '2026-01-01'), null);   // 2 年・30 年の列が無い
   assert.equal(T.buildCpi('表題だけ\n', '2026-01-01'), null);
   assert.equal(T.buildCpi(CPI_CSV, '2026-01-01'), null);   // 2020-03・2020-04 が欠けている
 });
@@ -150,8 +153,25 @@ test('道具: 文字コードは UTF-8 で読めれば UTF-8、読めなけれ�
   assert.equal(T.decode(Uint8Array.from([0x91, 0x8d, 0x8d, 0x87])), '総合');   // Shift_JIS の「総合」
 });
 
+// 実の CSV と同じ並び（表題 → 基準日と年限の見出し → 和暦の行、欠けは -）。値は作った物
+const JGB_CSV = [
+  '表,,,,',
+  '基準日,1年,2年,10年,30年',
+  'S49.9.24,8.1,8.2,-,-',
+  'S49.11.1,8.3,-,7.8,-',
+  'S49.12.2,8.4,8.5,7.7,9.1',
+].join('\n') + '\n';
+
+test('道具: 金利の CSV から写しを作ると、TENORS の年限だけ、その順に、年限ごとに最初に値の在る月から', () => {
+  const d = T.buildJgb(JGB_CSV, '2026-01-01');
+  assert.deepEqual(d.series.map((s) => s.name), ['10年', '2年', '30年']);
+  assert.deepEqual(d.series[0].months, [{ ym: '1974-11', value: 7.8 }, { ym: '1974-12', value: 7.7 }]);
+  assert.deepEqual(d.series[1].months, [{ ym: '1974-09', value: 8.2 }, { ym: '1974-10', value: null }, { ym: '1974-11', value: null }, { ym: '1974-12', value: 8.5 }]);
+  assert.deepEqual(d.series[2].months, [{ ym: '1974-12', value: 9.1 }]);
+});
+
 test('道具: 書く JSON は 1 か月 1 行で、読み戻すと同じ', () => {
-  const d = T.buildJgb('表,,\n基準日,1年,10年\nS49.9.24,8.1,-\nS49.10.1,-,7.8\n', '2026-01-01');
+  const d = T.buildJgb(JGB_CSV, '2026-01-01');
   const s = T.stringify(d);
   assert.deepEqual(JSON.parse(s), d);
   assert.ok(s.includes('\n        {"ym":"1974-10","value":null}'));

@@ -2,7 +2,7 @@
 // ===========================
 // 金利の今と昔（K245）のデータの写しを作る（yorozu-plans Q-805、D612・D627）
 // 財務省の国債金利（jgbcm_all.csv）と、e-Stat の消費者物価指数の長期時系列（全国・月次の中分類指数、1970 年 1 月から）を 1 回ずつ取り、
-// 国債金利は kinri/series.js の parseMofCsv・toMonthEnd で年限ごとの月末の値に、物価指数は「総合」の列の月の値と前年同月比にして、
+// 国債金利は kinri/series.js の parseMofCsv・toMonthEnd で、配る年限（TENORS: 10 年・2 年・30 年）だけの月末の値に、物価指数は「総合」の列の月の値と前年同月比にして、
 // kinri/data/jgb.json・kinri/data/cpi.json に書く。CSV そのものは保存しない（yorozu-plans Q-840、D659）。
 // 使い方（月 1 回）: node tools/kinri-data.js  → kinri/data/*.json が書き換わる。
 //   物価だけ: node tools/kinri-data.js cpi（金利の側は取りに行かない）。金利だけ: node tools/kinri-data.js jgb
@@ -30,6 +30,9 @@ const SOURCES = {
     terms: 'https://www.e-stat.go.jp/terms-of-use',
   },
 };
+
+// 配る年限の並び（画面が使う 3 つ。並びの順に jgb.json へ書く。yorozu-plans Q-830、D645）
+const TENORS = ['10年', '2年', '30年'];
 
 function cells(line) { return line.split(',').map((c) => c.trim().replace(/^"(.*)"$/, '$1').trim()); }
 function pad(n) { return (n < 10 ? '0' : '') + n; }
@@ -76,18 +79,27 @@ function withYoy(months) {
   });
 }
 
-/** 財務省の CSV の文字列 → jgb.json の中身。読めなければ null */
+/** 月の並びの頭の、値の無い月を落とす（年限ごとの始まりの月 ＝ 最初に値の在る月） */
+function fromFirstValue(months) {
+  const i = months.findIndex((m) => m.value !== null);
+  return i < 0 ? [] : months.slice(i);
+}
+
+/** 財務省の CSV の文字列 → jgb.json の中身（TENORS の年限だけ、その順）。読めない・TENORS の年限が欠ける時は null */
 function buildJgb(text, fetched) {
-  const series = Kinri.parseMofCsv(text);
-  if (series.length === 0) return null;
+  const all = Kinri.parseMofCsv(text);
+  const series = TENORS.map((name) => all.find((s) => s.name === name));
+  if (series.some((s) => !s)) return null;
+  const monthsOf = series.map((s) => fromFirstValue(Kinri.toMonthEnd(s.points)));
+  if (monthsOf.some((m) => m.length === 0)) return null;
   return {
     source: { name: SOURCES.jgb.name, url: SOURCES.jgb.url, page: SOURCES.jgb.page, license: SOURCES.jgb.license },
     credit: attribution(SOURCES.jgb),
     fetched,
-    processing: '営業日ごとの値を月末の値に直した（その月で最後に値の在る日の値。値の無い月は null）',
+    processing: '10年・2年・30年の列だけを取り出し、営業日ごとの値を月末の値に直した（その月で最後に値の在る日の値。年限ごとに最初に値の在る月から並べ、その後の値の無い月は null）',
     kind: 'rate',
     unit: '%',
-    series: series.map((s) => ({ name: s.name, months: Kinri.toMonthEnd(s.points) })),
+    series: series.map((s, i) => ({ name: s.name, months: monthsOf[i] })),
   };
 }
 
@@ -169,5 +181,5 @@ async function main() {
   }
 }
 
-module.exports = { SOURCES, cpiYm, parseCpiCsv, withYoy, buildJgb, buildCpi, decode, planOf, stringify };
+module.exports = { SOURCES, TENORS, cpiYm, parseCpiCsv, withYoy, buildJgb, buildCpi, decode, planOf, stringify };
 if (require.main === module) main().catch((e) => { console.error(e.message); process.exitCode = 1; });
