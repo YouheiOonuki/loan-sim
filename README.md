@@ -49,7 +49,7 @@ yorozu-craft のツールの1つです（共通ルールは [youheioonuki.github
 | `chart-geom.js` | グラフの目盛りと、繰上返済の印の位置・動かせる範囲（純粋関数。範囲は `calc.js` の `simulate` を呼んで取る） |
 | `rate-line.js` | 当初の金利と毎月の返済額の線と、金利の印の位置・動かせる範囲（純粋関数。線の点は `calc.js` の `simulate` を当初の金利だけ変えて呼ぶ。範囲は欄 `#rate0` の min・max） |
 | `main.js` | 画面の制御・保存・共有リンク・グラフ・繰上返済の印・金利の線と印・比較 |
-| `screen.js` | 画面の骨組み（yorozu-plans の SCREEN.md 1.1）の共通部品: 「くわしく入れる」の summary の更新と上端の固定バー（seido-keisan の `lib/screen.js` と同じ中身） |
+| `screen-parts.js` | 画面の骨組み（yorozu-plans の SCREEN.md 1.1）の共通部品: 「くわしく入れる」の summary の更新と上端の固定バー（seido-keisan の `lib/screen-parts.js` と同じ中身） |
 | `style.css` | 見た目（和紙風の配色、ダークモード対応） |
 | `404.html` | ツール配下の存在しない URL で出るページ（サイト共通のもの） |
 | `favicon.svg` / `apple-touch-icon.png` / `og-image.png` | アイコン / ホーム画面用アイコン / SNS 共有用画像（1200×630） |
