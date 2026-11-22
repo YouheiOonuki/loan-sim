@@ -97,6 +97,14 @@ test('画面: 外の口へ読みに行かない・評価の語と商品の名前
   assert.ok(html.includes('https://www.stat-search.boj.or.jp/'));
 });
 
+test('AdSense: 所有確認の meta と広告配信の script が 1 つずつ（check-site の道具のページの決まり。/loan-sim/kinri/ は REVIEW_NO_AD_PAGES に無い）', () => {
+  const html = fs.readFileSync(path.join(__dirname, '../kinri/index.html'), 'utf8');
+  const id = 'ca-pub-5375267956079717';
+  assert.equal((html.match(new RegExp(`name="google-adsense-account"\\s+content="${id}"`, 'g')) || []).length, 1);
+  assert.equal((html.match(new RegExp(`adsbygoogle\\.js\\?client=${id}`, 'g')) || []).length, 1);
+  assert.ok(!/class="adsbygoogle"/.test(html));
+});
+
 test('出典の行: 物価は写しの credit と同じく「…を加工して作成（前年同月比は指数から計算）」で終わる（Q-903）', () => {
   assert.ok(A.creditNote(CPI).length > 0);
   assert.ok(CPI.credit.endsWith('を加工して作成' + A.creditNote(CPI)), CPI.credit);
