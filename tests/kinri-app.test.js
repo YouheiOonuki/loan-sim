@@ -131,3 +131,13 @@ test('図の線: 2 年の値が欠けた月（写しで null の月）で線を�
   assert.equal(A.pointText(7.735, 3), '7.735%');
   assert.equal(A.pointText(-0.2, 1), '−0.2%');
 });
+
+test('使われた数（used.js）: repo の最上位の used.js を読み、結果を出す showResult の末尾で window.yzUsed?.() を呼ぶ（住宅ローンの画面と同じ）', () => {
+  const html = fs.readFileSync(path.join(__dirname, '../kinri/index.html'), 'utf8');
+  const js = fs.readFileSync(path.join(__dirname, '../kinri/app.js'), 'utf8');
+  const srcs = [...html.matchAll(/<script\b[^>]*\bsrc="([^"]+)"/g)].map((m) => m[1]).filter((s) => s.startsWith('.'));
+  assert.deepEqual(srcs, ['../used.js', './series.js', './app.js']);
+  assert.ok(fs.existsSync(path.join(__dirname, '../used.js')));
+  const body = js.slice(js.indexOf('function showResult('), js.indexOf('function onPoint('));
+  assert.match(body, /out\.appendChild\(wrap\);\n\s*window\.yzUsed\?\.\(\);\n\s*\}/);
+});
