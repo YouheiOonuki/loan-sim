@@ -84,7 +84,11 @@
     return out;
   }
 
-  var Model = { tenorLabel: tenorLabel, ymText: ymText, cpiYoy: cpiYoy, rateSeries: rateSeries, yearView: yearView, fromLine: fromLine, ticks: ticks, signed: signed, num: num };
+  /** 写しの出典の行（credit）の「を加工して作成」より後ろ（物価なら「（前年同月比は指数から計算）」。無ければ空） */
+  var MADE = 'を加工して作成';
+  function creditNote(d) { var i = d.credit.lastIndexOf(MADE); return i < 0 ? '' : d.credit.slice(i + MADE.length); }
+
+  var Model = { tenorLabel: tenorLabel, ymText: ymText, cpiYoy: cpiYoy, rateSeries: rateSeries, yearView: yearView, fromLine: fromLine, ticks: ticks, signed: signed, num: num, creditNote: creditNote };
   if (typeof module !== 'undefined' && module.exports) { module.exports = Model; return; }
   root.KinriApp = Model;
 
@@ -297,6 +301,7 @@
     a.href = state.jgb.source.page; a.textContent = state.jgb.source.name;
     b.href = state.cpi.source.page; b.textContent = state.cpi.source.name;
     $('src-cpi-table').textContent = 'の' + state.cpi.source.table;
+    $('src-note').textContent = creditNote(state.cpi);
     $('fetched').textContent = state.jgb.fetched === state.cpi.fetched ? state.jgb.fetched : state.jgb.fetched + '・' + state.cpi.fetched;
     // 「いま」の月（最後の月末）を字で。2 つの写しの最後の月が違えば、それぞれを出す
     var lr = state.jgb.series[0].months, lc = state.cpi.series[0].months;

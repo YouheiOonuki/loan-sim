@@ -96,3 +96,11 @@ test('画面: 外の口へ読みに行かない・評価の語と商品の名前
   // 日本銀行はリンクだけ
   assert.ok(html.includes('https://www.stat-search.boj.or.jp/'));
 });
+
+test('出典の行: 物価は写しの credit と同じく「…を加工して作成（前年同月比は指数から計算）」で終わる（Q-903）', () => {
+  assert.ok(A.creditNote(CPI).length > 0);
+  assert.ok(CPI.credit.endsWith('を加工して作成' + A.creditNote(CPI)), CPI.credit);
+  assert.equal(A.creditNote(JGB), '');
+  const html = fs.readFileSync(path.join(__dirname, '../kinri/index.html'), 'utf8');
+  assert.ok(html.includes('を加工して作成<span id="src-note"></span>（確認日'));
+});
