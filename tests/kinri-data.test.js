@@ -59,8 +59,8 @@ test('国債金利: 年限ごとに最初に値の在る月から、取った月
 test('国債金利: 値の無い年を渡すと、値でなく「無い」が返る（10 年の 1985 年・30 年の 1998 年）', () => {
   const ten = { name: '10年', kind: 'rate', months: JGB.series[0].months };
   const thirty = { name: '30年', kind: 'rate', months: JGB.series[2].months };
-  assert.deepEqual(K.yearMark([ten], 1985)[0], { name: '10年', kind: 'rate', none: true });
-  assert.deepEqual(K.yearMark([thirty], 1998)[0], { name: '30年', kind: 'rate', none: true });
+  assert.deepEqual(K.yearMark([ten], 1985)[0], { name: '10年', kind: 'rate', none: true, from: '1986-07' });
+  assert.deepEqual(K.yearMark([thirty], 1998)[0], { name: '30年', kind: 'rate', none: true, from: '1999-09' });
   assert.equal(typeof K.yearMark([ten], 1986)[0].then, 'number');
 });
 
@@ -75,6 +75,7 @@ test('国債金利: 年を渡すと、その年で最後に値の在る月の値
   assert.equal(at(two.months, '1979-07').value, null);
   assert.equal(K.yearMark([two], 1978)[0].then, at(two.months, '1978-05').value);
   assert.equal(K.yearMark([two], 1979)[0].then, at(two.months, '1979-12').value);
+  assert.equal(K.yearMark([two], 1978)[0].thenYm, '1978-05');
 });
 
 test('物価指数: 総合の月の値が 1970-01 から取った月の前の月あたりまで欠けず並ぶ（出どころは e-Stat の 1 つ）', () => {

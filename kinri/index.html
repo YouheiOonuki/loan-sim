@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>金利の今と昔 国債金利と物価の推移｜yorozu-craft</title>
+  <meta name="description" content="財務省の国債金利（10年・2年・30年）と総務省統計局の消費者物価指数の前年比を1枚の図に重ねます。年を1つ入れると、その年の値といまの値と差が出ます。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://yorozu-craft.com/loan-sim/kinri/">
+
+  <meta property="og:title" content="金利の今と昔 国債金利と物価の推移｜yorozu-craft">
+  <meta property="og:description" content="財務省の国債金利（10年・2年・30年）と総務省統計局の消費者物価指数の前年比を1枚の図に重ねます。年を1つ入れると、その年の値といまの値と差が出ます。">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://yorozu-craft.com/loan-sim/kinri/">
+  <meta property="og:site_name" content="yorozu-craft">
+  <meta property="og:locale" content="ja_JP">
+  <meta name="theme-color" content="#eef0f2" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#15191d" media="(prefers-color-scheme: dark)">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "金利の今と昔",
+    "description": "財務省の国債金利（10年・2年・30年）と総務省統計局の消費者物価指数の前年比を1枚の図に重ねます。年を1つ入れると、その年の値といまの値と差が出ます。",
+    "url": "https://yorozu-craft.com/loan-sim/kinri/",
+    "applicationCategory": "UtilitiesApplication",
+    "operatingSystem": "All",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "JPY" },
+    "inLanguage": "ja"
+  }
+  </script>
+
+  <!-- Google AdSense: サイト所有確認の meta だけ（住宅ローンの画面と同じ）。新しい道具の最初の公開は門 -->
+  <meta name="google-adsense-account" content="ca-pub-5375267956079717">
+
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="apple-touch-icon" href="../apple-touch-icon.png">
+  <link rel="stylesheet" href="../style.css">
+  <style>
+    /* 図の 2 本の線の色（dataviz の既定の 1・2 番。明るい側と暗い側を validate_palette.js で確かめた: 隣どうしの色覚の差 ΔE 24.7・26.8、面との比 3:1 以上） */
+    .kinri { --k-s1: #2a78d6; --k-s2: #eb6834; }
+    @media (prefers-color-scheme: dark) { :where(html:not([data-skin="base"])) .kinri { --k-s1: #3987e5; --k-s2: #d95926; } }
+    .k-controls { display: flex; flex-wrap: wrap; align-items: flex-end; gap: var(--sp-3) var(--sp-4); margin-bottom: var(--sp-3); }
+    .k-controls .field { margin-bottom: 0; }
+    .k-tenors { display: flex; gap: 0; border: none; }
+    .k-tenors legend { font-weight: 700; margin-bottom: var(--sp-1); }
+    .k-tenor { min-height: var(--tap); min-width: 4.5rem; border-radius: 0; }
+    .k-tenor:first-of-type { border-radius: var(--radius) 0 0 var(--radius); }
+    .k-tenor:last-of-type { border-radius: 0 var(--radius) var(--radius) 0; }
+    .k-tenor + .k-tenor { margin-left: -1px; }
+    .k-tenor[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); position: relative; }
+    .k-controls input#year { width: 7rem; max-width: 7rem; }
+    .kinri .chart { position: relative; touch-action: pan-y; min-height: 240px; }
+    .kinri .chart svg { width: 100%; height: auto; }
+    .k-axis { fill: var(--muted); font-size: 12px; }
+    .k-zero { stroke: var(--muted); stroke-width: 1; }
+    .k-tick { stroke: var(--muted); stroke-width: 1; }
+    .k-line { fill: none; stroke-width: 2; stroke-linejoin: round; }
+    .k-line.k-s1 { stroke: var(--k-s1); }
+    .k-line.k-s2 { stroke: var(--k-s2); }
+    .k-band { fill: var(--text); opacity: 0.08; }
+    .k-dot { stroke: var(--card); stroke-width: 2; }
+    .k-dot.k-s1 { fill: var(--k-s1); }
+    .k-dot.k-s2 { fill: var(--k-s2); }
+    .k-hair { stroke: var(--muted); stroke-width: 1; }
+    .k-key { display: inline-block; width: 1.2rem; height: 0; border-top: 3px solid; vertical-align: middle; margin-right: var(--sp-1); }
+    .k-key.k-s1 { border-color: var(--k-s1); }
+    .k-key.k-s2 { border-color: var(--k-s2); }
+    .k-tip { position: absolute; top: 0; pointer-events: none; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: var(--sp-1) var(--sp-2); font-size: var(--fs-s); white-space: nowrap; }
+    .k-tip-ym { color: var(--muted); }
+    .k-from { font-weight: 700; margin: var(--sp-3) 0 var(--sp-1); }
+    #result { margin-top: var(--sp-3); }
+    .k-tbl { width: auto; min-width: 16rem; }
+    .k-tbl td small { display: block; font-size: var(--fs-s); color: var(--muted); font-weight: 400; }
+    .k-src { font-size: var(--fs-s); color: var(--muted); }
+    .kinri .link-row { margin-bottom: var(--sp-3); }
+    .kinri details:not(.card) .table-wrap { margin-top: var(--sp-3); }
+  </style>
+</head>
+<body>
+
+  <header class="app-header">
+    <h1>金利の今と昔</h1>
+  </header>
+
+  <main class="app-main kinri">
+
+    <p class="badge"><span id="asof"></span>・入力は外部に送信しません</p>
+
+    <section class="card" aria-labelledby="h-fig">
+      <h2 id="h-fig">国債の金利と物価の前年比</h2>
+      <div class="k-controls">
+        <fieldset class="k-tenors" id="tenors"><legend>国債の年限</legend></fieldset>
+        <div class="field">
+          <label for="year">年</label>
+          <input type="number" id="year" inputmode="numeric" min="1000" step="1" placeholder="例：1990" autocomplete="off">
+        </div>
+      </div>
+      <p class="legend"><span class="k-key k-s1"></span><span id="lg-rate">国債の金利</span><span class="k-key k-s2"></span>物価の前年比</p>
+      <div id="chart" class="chart"><div id="tip" class="k-tip" hidden></div></div>
+      <div id="result" aria-live="polite" hidden></div>
+      <details class="opt no-print">
+        <summary>年ごとの値の表</summary>
+        <div class="table-wrap" tabindex="0">
+          <table class="tbl num">
+            <thead><tr><th scope="col">年</th><th scope="col" id="years-rate">国債の金利</th><th scope="col">物価の前年比</th></tr></thead>
+            <tbody id="years-body"></tbody>
+          </table>
+        </div>
+      </details>
+    </section>
+
+    <p class="k-src">出典: <a id="src-jgb"></a>、<a id="src-cpi"></a><span id="src-cpi-table"></span>を加工して作成<span id="src-note"></span>（確認日 <span id="fetched"></span>）</p>
+    <p class="link-row"><a href="https://www.stat-search.boj.or.jp/">日本銀行の金利の統計（時系列統計データ検索サイト）</a></p>
+
+    <!-- about-tool: 道具の説明（WRITING 1 章）。この道具は使い方ページを持たない -->
+    <details class="about-tool card opt no-print" id="about-tool">
+      <summary>この道具について（使い方・しくみ・注意）</summary>
+      <h3>金利の今と昔でわかること</h3>
+      <p>財務省が公表している国債の金利と、総務省統計局の消費者物価指数の前年同月比を、月ごとの線で 1 枚の図に重ねます。年を入れると、その年の値と、いまの値と、その差が出ます。</p>
+      <h3>使い方の要点</h3>
+      <ul>
+        <li>「国債の年限」のボタンで、図と表に出す国債の年限（10 年・2 年・30 年）を替えます。</li>
+        <li>「年」の欄に西暦の年を入れると、図のその年に印が付き、図の下に値が出ます。</li>
+      </ul>
+      <h3>しくみ</h3>
+      <p>国債の金利は、営業日ごとの値を月末の値に直したもので、その月で最後に値のある日の値です。その年の値は、その年で最後に値のある月の値で、いまの値は最後の月の値です。差は、いまの値からその年の値を引いた値で、単位はポイントです。物価の前年比は、指数の月の値から計算し、小数 1 桁で出します。年限ごとに値の始まる月が違い、値の無い年を入れた時は、値の始まる月だけを出します。</p>
+      <h3>注意</h3>
+      <p>出すのは公表された過去の値だけで、この先の金利や物価の見込みは出しません。日本銀行の政策金利や、預金・貸出の金利は、上のリンクの日本銀行のページで見られます。</p>
+    </details>
+    <!-- /about-tool -->
+
+  </main>
+
+  <footer class="app-footer">
+    <nav class="footer-nav" aria-label="フッターナビゲーション">
+      <ul>
+        <li><a href="../../">yorozu-craft トップ</a></li>
+        <li><a href="../">住宅ローン 返済シミュレーター</a></li>
+        <li><a href="./" aria-current="page">金利の今と昔</a></li>
+        <li><a href="../../about.html">運営者情報</a></li>
+        <li><a href="../../privacy-policy.html">プライバシーポリシー</a></li>
+      </ul>
+    </nav>
+    <p>&copy; 2026 yorozu-craft. All rights reserved.</p>
+  </footer>
+
+  <script src="./series.js"></script>
+  <script src="./app.js"></script>
+  <!-- Cloudflare Web Analytics（Cookie を使わないアクセス解析） --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "b79bf821e1fd4b6683866d493b1de426"}'></script><!-- End Cloudflare Web Analytics -->
+</body>
+</html>

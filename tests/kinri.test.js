@@ -95,15 +95,18 @@ const CPI = { name: '消費者物価指数', kind: 'index', unit: '2020年=100',
 
 test('yearMark: 金利はポイントの差、指数は比、その年の最後の値の在る月の値', () => {
   const r = K.yearMark([RATE, CPI], 2016);
-  assert.deepEqual(r[0], { name: '10年', kind: 'rate', then: -0.06, now: 1.1, points: 1.16 });
-  assert.deepEqual(r[1], { name: '消費者物価指数', kind: 'index', then: 98.5, now: 110.84, ratio: Math.round(110.84 / 98.5 * 1e9) / 1e9 });
+  assert.deepEqual(r[0], { name: '10年', kind: 'rate', then: -0.06, thenYm: '2016-02', now: 1.1, nowYm: '2024-12', points: 1.16 });
+  assert.deepEqual(r[1], { name: '消費者物価指数', kind: 'index', then: 98.5, thenYm: '2016-12', now: 110.84, nowYm: '2024-12', ratio: Math.round(110.84 / 98.5 * 1e9) / 1e9 });
 });
 
 test('yearMark: その年の値が無い系列は「無い」と返す（始まりの違う 2 系列）', () => {
   const r = K.yearMark([RATE, CPI], 2015);
-  assert.deepEqual(r[0], { name: '10年', kind: 'rate', then: 0.27, now: 1.1, points: 0.83 });
-  assert.deepEqual(r[1], { name: '消費者物価指数', kind: 'index', none: true });
+  assert.deepEqual(r[0], { name: '10年', kind: 'rate', then: 0.27, thenYm: '2015-12', now: 1.1, nowYm: '2024-12', points: 0.83 });
+  assert.deepEqual(r[1], { name: '消費者物価指数', kind: 'index', none: true, from: '2016-01' });
   assert.ok(K.yearMark([RATE], 1990)[0].none);
+  assert.equal(K.yearMark([RATE], 1990)[0].from, '2015-11');   // 始まりの月は、最初に値の在る月
+  assert.equal(K.yearMark([{ name: 'x', kind: 'rate', months: [{ ym: '2020-01', value: null }, { ym: '2020-02', value: 1 }] }], 2019)[0].from, '2020-02');
+  assert.equal(K.yearMark([{ name: 'x', kind: 'rate', months: [] }], 2019)[0].from, null);
 });
 
 test('yearMark: 系列 0 個は空', () => {
