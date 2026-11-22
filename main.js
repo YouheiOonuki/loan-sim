@@ -352,7 +352,7 @@
     setText('sum-pre', state.prepays.length ? state.prepays.length + ' 回' : 'なし');
   }
 
-  // --- 固定バー（SCREEN.md 1.1・D59）: 結果が画面の外にあるときだけ上端に出す（screen.js）。
+  // --- 固定バー（SCREEN.md 1.1・D59）: 結果が画面の外にあるときだけ上端に出す（screen-parts.js）。
   // 読み込み時から既定の条件で結果が出ているので、スクロールか入力をするまでは出さない
   var setBar = window.ScreenParts.fixbar({ waitForUser: true });
 

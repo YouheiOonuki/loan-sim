@@ -49,7 +49,7 @@ yorozu-craft のツールの1つです（共通ルールは [youheioonuki.github
 | `chart-geom.js` | グラフの目盛りと、繰上返済の印の位置・動かせる範囲（純粋関数。範囲は `calc.js` の `simulate` を呼んで取る） |
 | `rate-line.js` | 当初の金利と毎月の返済額の線と、金利の印の位置・動かせる範囲（純粋関数。線の点は `calc.js` の `simulate` を当初の金利だけ変えて呼ぶ。範囲は欄 `#rate0` の min・max） |
 | `main.js` | 画面の制御・保存・共有リンク・グラフ・繰上返済の印・金利の線と印・比較 |
-| `screen.js` | 画面の骨組み（yorozu-plans の SCREEN.md 1.1）の共通部品: 「くわしく入れる」の summary の更新と上端の固定バー（seido-keisan の `lib/screen.js` と同じ中身） |
+| `screen-parts.js` | 画面の骨組み（yorozu-plans の SCREEN.md 1.1）の共通部品: 「くわしく入れる」の summary の更新と上端の固定バー（seido-keisan の `lib/screen-parts.js` と同じ中身） |
 | `style.css` | 見た目（和紙風の配色、ダークモード対応） |
 | `404.html` | ツール配下の存在しない URL で出るページ（サイト共通のもの） |
 | `favicon.svg` / `apple-touch-icon.png` / `og-image.png` | アイコン / ホーム画面用アイコン / SNS 共有用画像（1200×630） |
@@ -66,7 +66,7 @@ yorozu-craft のツールの1つです（共通ルールは [youheioonuki.github
 金利の今と昔の写しの出典（規約の名前は、出どころが名乗る名前のまま）:
 
 - 国債金利: 財務省「国債金利情報」（https://www.mof.go.jp/jgbs/reference/interest_rate/index.htm）を加工して作成。公共データ利用規約（第1.0版）（PDL1.0）
-- 物価: 政府統計の総合窓口（e-Stat）総務省統計局「2020年基準消費者物価指数 長期時系列 品目別価格指数 全国 月次 中分類指数（1970年1月～最新月）」（https://www.e-stat.go.jp/）を加工して作成。政府統計の総合窓口（e-Stat）利用規約（https://www.e-stat.go.jp/terms-of-use）
+- 物価: 政府統計の総合窓口（e-Stat）総務省統計局「2020年基準消費者物価指数 長期時系列 品目別価格指数 全国 月次 中分類指数（1970年1月～最新月）」（https://www.e-stat.go.jp/）を加工して作成（前年同月比は指数から計算）。政府統計の総合窓口（e-Stat）利用規約（https://www.e-stat.go.jp/terms-of-use）
 - 取った日は `kinri/data/*.json` の `fetched`
 
 ## ライセンス
