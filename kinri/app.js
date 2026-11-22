@@ -232,6 +232,7 @@
     t.appendChild(tb);
     wrap.appendChild(t);
     out.appendChild(wrap);
+    window.yzUsed?.();
   }
 
   // 図の上を指でなぞる・マウスを載せると、その月の値（値は表と字でも読める。ここは足すだけ）
