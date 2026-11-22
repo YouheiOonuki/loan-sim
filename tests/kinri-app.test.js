@@ -104,3 +104,22 @@ test('出典の行: 物価は写しの credit と同じく「…を加工して�
   const html = fs.readFileSync(path.join(__dirname, '../kinri/index.html'), 'utf8');
   assert.ok(html.includes('を加工して作成<span id="src-note"></span>（確認日'));
 });
+
+test('図の線: 2 年の値が欠けた月（写しで null の月）で線を切り、欠けた月を選ぶと値の所が「—」（D694・Q-910）', () => {
+  const K = require('../kinri/series.js');
+  const two = A.rateSeries(JGB, '2年');
+  const gap = two.months.filter((m) => m.value === null).map((m) => m.ym);
+  // 写しの欠けは 1 か所の続いた月（期待する月は写しから引く）
+  assert.ok(gap.length > 0);
+  assert.equal(gap[0], '1978-06');
+  assert.equal(gap.at(-1), '1979-07');
+  const cp = K.chartPoints([two]);
+  const d = A.linePath(cp.series[0].points, (x) => x, (v) => v);
+  // 線は欠けの前と後の 2 本（M が 2 つ）。欠けた月の x は線に出ない
+  assert.equal((d.match(/M/g) || []).length, 2);
+  const gx = cp.series[0].points.filter((p) => p.value === null).map((p) => p.x.toFixed(1));
+  for (const x of gx) assert.ok(!new RegExp('[ML]' + x.replace('.', '\.') + ' ').test(d), x);
+  assert.equal(A.pointText(null, 3), '—');
+  assert.equal(A.pointText(7.735, 3), '7.735%');
+  assert.equal(A.pointText(-0.2, 1), '−0.2%');
+});

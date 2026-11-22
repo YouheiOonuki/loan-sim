@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>金利の今と昔の使い方（国債金利と物価の前年比の出典）｜yorozu-craft</title>
+  <meta name="description" content="国債金利（10年・2年・30年）と消費者物価指数の前年比を1枚の図に重ねる画面の使い方。月末の値の取り方、前年比の計算、年限ごとの値の始まり、財務省と総務省統計局の出典と規約、確認日。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://yorozu-craft.com/loan-sim/kinri/guide.html">
+
+  <meta property="og:title" content="金利の今と昔の使い方（国債金利と物価の前年比の出典）｜yorozu-craft">
+  <meta property="og:description" content="国債金利（10年・2年・30年）と消費者物価指数の前年比を1枚の図に重ねる画面の使い方。月末の値の取り方、前年比の計算、年限ごとの値の始まり、財務省と総務省統計局の出典と規約、確認日。">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://yorozu-craft.com/loan-sim/kinri/guide.html">
+  <meta property="og:site_name" content="yorozu-craft">
+  <meta property="og:locale" content="ja_JP">
+  <meta property="og:image" content="https://yorozu-craft.com/loan-sim/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <!-- よくある質問（下の #faq と内容をそろえる） -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "2年の国債の金利の線が途中で切れているのはなぜですか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "財務省の表に、1978年6月から1979年7月までの2年の値が無いためです。その間は線を切り、図の上でその月を選ぶと値の所は「—」です。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "物価の前年比は、総務省統計局の公表値と同じですか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "使っている統計局の表に前年同月比の項目が無いため、月の指数（小数1桁）から計算しています。公表の前年同月比と、小数第1位で違う場合があります。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "日本銀行の政策金利や住宅ローンの金利は見られますか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "出すのは国債の金利（10年・2年・30年）と物価の前年比だけです。日本銀行の金利は日本銀行の時系列統計データ検索サイトで、住宅ローンの返済額は住宅ローン 返済シミュレーターで試せます。"
+        }
+      }
+    ]
+  }
+  </script>
+
+  <!-- Google AdSense（サイト所有確認 + 広告配信スクリプト） -->
+  <meta name="google-adsense-account" content="ca-pub-5375267956079717">
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5375267956079717"
+     crossorigin="anonymous"></script>
+
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="apple-touch-icon" href="../apple-touch-icon.png">
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+
+  <header class="app-header">
+    <h1>金利の今と昔の使い方</h1>
+    <p class="subtitle">使い方・値の取り方・根拠と確認日・よくある質問・ご利用上の注意</p>
+  </header>
+
+  <main class="app-main">
+
+    <p class="card" style="text-align:center"><a href="./">▶ 金利の今と昔を使う</a></p>
+
+    <article class="card content" id="howto">
+      <h2>使い方</h2>
+      <ol>
+        <li>「国債の年限」のボタンで、10 年・2 年・30 年から 1 つ選びます。</li>
+        <li>「年」の欄に西暦の年を入れます（例：1990）。</li>
+        <li>図のその年に印が付き、図の下にその年・いま・差の値が出ます。</li>
+        <li>図の上を指でなぞるかマウスを載せると、その月の値が出ます。</li>
+      </ol>
+      <p>年ごとの値は、図の下の「年ごとの値の表」で読めます。</p>
+    </article>
+
+    <article class="card content" id="premise">
+      <h2>値の取り方</h2>
+      <ul>
+        <li>国債の金利は、財務省が公表する営業日ごとの値を、その月で最後に値のある日の値にそろえた月末の値です。</li>
+        <li>物価の前年比は、消費者物価指数（全国・総合）の月の指数から計算した前年同月比で、小数 1 桁で出します。</li>
+        <li>その年の値は、その年で最後に値のある月の値です。いまの値は最後の月の値で、差はいまの値からその年の値を引いたポイントです。</li>
+        <li>年限ごとに値の始まる月が違います。値の無い年を入れると、国債の金利は値の始まる月だけが出て、物価の前年比は出ます。</li>
+      </ul>
+    </article>
+
+    <article class="card content" id="basis">
+      <h2>根拠と確認日</h2>
+      <p>根拠: 財務省「国債金利情報」・総務省統計局「消費者物価指数」。確認日 <time datetime="" id="fetched"></time>。</p>
+      <details>
+        <summary>出典と規約</summary>
+        <ul id="sources" style="overflow-wrap:anywhere"></ul>
+      </details>
+    </article>
+
+    <article class="card content" id="faq">
+      <h2>よくある質問</h2>
+      <dl class="faq">
+        <dt>2年の国債の金利の線が途中で切れているのはなぜですか？</dt>
+        <dd>財務省の表に、1978年6月から1979年7月までの2年の値が無いためです。その間は線を切り、図の上でその月を選ぶと値の所は「—」です。</dd>
+        <dt>物価の前年比は、総務省統計局の公表値と同じですか？</dt>
+        <dd>使っている統計局の表に前年同月比の項目が無いため、月の指数（小数1桁）から計算しています。公表の前年同月比と、小数第1位で違う場合があります。</dd>
+        <dt>日本銀行の政策金利や住宅ローンの金利は見られますか？</dt>
+        <dd>出すのは国債の金利（10年・2年・30年）と物価の前年比だけです。日本銀行の金利は<a href="https://www.stat-search.boj.or.jp/">日本銀行の時系列統計データ検索サイト</a>で、住宅ローンの返済額は<a href="../">住宅ローン 返済シミュレーター</a>で試せます。</dd>
+      </dl>
+    </article>
+
+    <!-- README「ツールを追加するとき」8: ツール固有の注意・データの扱いはここに書く -->
+    <article class="card content" id="notes">
+      <h2>ご利用上の注意・データの扱い</h2>
+      <ul>
+        <li>出すのは公表された過去の値だけで、この先の金利や物価の見込みは出しません。借入や投資の助言ではありません。</li>
+        <li>入れた年は保存せず、外部にも送信しません。</li>
+      </ul>
+      <p><a href="/post/?from=/loan-sim/kinri/guide.html">ご要望・不具合の報告</a>：いただいた内容をもとに直します。お返事はしていません。</p>
+      <p>サイト全体の運営者情報・免責事項は<a href="../../about.html">こちら</a>、プライバシーポリシーは<a href="../../privacy-policy.html">こちら</a>です（すべてのツールで共通）。</p>
+
+      <h3 id="changelog">更新履歴</h3>
+      <ul>
+        <li><time datetime="2026-11-22">2026年11月22日</time> 公開</li>
+      </ul>
+    </article>
+
+  </main>
+
+  <footer class="app-footer">
+    <nav class="footer-nav" aria-label="フッターナビゲーション">
+      <ul>
+        <li><a href="../../">yorozu-craft トップ</a></li>
+        <li><a href="../">住宅ローン 返済シミュレーター</a></li>
+        <li><a href="./">金利の今と昔</a></li>
+        <li><a href="./guide.html" aria-current="page">使い方・よくある質問</a></li>
+        <li><a href="../../about.html">運営者情報</a></li>
+        <li><a href="../../privacy-policy.html">プライバシーポリシー</a></li>
+      </ul>
+    </nav>
+    <p>&copy; 2026 yorozu-craft. All rights reserved.</p>
+  </footer>
+
+  <script>
+    // 出典・規約・確認日は、画面と同じ写し（data/*.json の credit・license・terms・fetched）から出す（字を HTML に持たない）
+    (function () {
+      Promise.all([fetch('./data/jgb.json'), fetch('./data/cpi.json')]).then(function (rs) {
+        return Promise.all(rs.map(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }));
+      }).then(function (d) {
+        var ul = document.getElementById('sources');
+        d.forEach(function (x) {
+          var li = document.createElement('li');
+          li.appendChild(document.createTextNode(x.credit + '。規約: '));
+          if (x.source.terms) {
+            var a = document.createElement('a');
+            a.href = x.source.terms; a.rel = 'noopener'; a.target = '_blank'; a.textContent = x.source.license;
+            li.appendChild(a);
+          } else li.appendChild(document.createTextNode(x.source.license));
+          ul.appendChild(li);
+        });
+        var f = d[0].fetched === d[1].fetched ? d[0].fetched : d[0].fetched + '・' + d[1].fetched;
+        var t = document.getElementById('fetched');
+        t.dateTime = d[0].fetched; t.textContent = f;
+      }).catch(function () {});
+    })();
+  </script>
+  <!-- Cloudflare Web Analytics（Cookie を使わないアクセス解析） --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "b79bf821e1fd4b6683866d493b1de426"}'></script><!-- End Cloudflare Web Analytics -->
+</body>
+</html>

@@ -88,7 +88,21 @@
   var MADE = 'を加工して作成';
   function creditNote(d) { var i = d.credit.lastIndexOf(MADE); return i < 0 ? '' : d.credit.slice(i + MADE.length); }
 
-  var Model = { tenorLabel: tenorLabel, ymText: ymText, cpiYoy: cpiYoy, rateSeries: rateSeries, yearView: yearView, fromLine: fromLine, ticks: ticks, signed: signed, num: num, creditNote: creditNote };
+  /** 図の線の d。値の無い月（null）で線を切る（年限をまたいでも、欠けた月をまたいでもつながない。D694） */
+  function linePath(points, X, Y) {
+    var d = '', pen = false;
+    (points || []).forEach(function (p) {
+      if (p.value === null) { pen = false; return; }
+      d += (pen ? 'L' : 'M') + X(p.x).toFixed(1) + ' ' + Y(p.value).toFixed(1);
+      pen = true;
+    });
+    return d;
+  }
+
+  /** 図の上で選んだ月の値の字。その月の値が欠けていれば「—」（字は足さない。D694） */
+  function pointText(value, digits) { return value === null ? '—' : num(value, digits) + '%'; }
+
+  var Model = { tenorLabel: tenorLabel, ymText: ymText, cpiYoy: cpiYoy, rateSeries: rateSeries, yearView: yearView, fromLine: fromLine, ticks: ticks, signed: signed, num: num, creditNote: creditNote, linePath: linePath, pointText: pointText };
   if (typeof module !== 'undefined' && module.exports) { module.exports = Model; return; }
   root.KinriApp = Model;
 
@@ -151,13 +165,7 @@
     }
     // 線は値の在る月だけ（値の無い月で切る。年限をまたいでつながない）
     cp.series.forEach(function (s, i) {
-      var d = '', pen = false;
-      s.points.forEach(function (p) {
-        if (p.value === null) { pen = false; return; }
-        d += (pen ? 'L' : 'M') + X(p.x).toFixed(1) + ' ' + Y(p.value).toFixed(1);
-        pen = true;
-      });
-      svg.appendChild(el('path', { 'class': 'k-line k-s' + (i + 1), d: d }));
+      svg.appendChild(el('path', { 'class': 'k-line k-s' + (i + 1), d: linePath(s.points, X, Y) }));
     });
     var markLayer = el('g', { 'class': 'k-mark-layer' });
     svg.appendChild(markLayer);
@@ -238,9 +246,9 @@
     g.series.forEach(function (s, i) {
       var p = s.points.filter(function (q) { return q.x === x; })[0];
       if (p) ym = p.ym;
-      if (p && p.value !== null) rows.push({ i: i, label: i === 0 ? tenorLabel(state.tenor) : '物価', text: num(p.value, i === 0 ? DIGITS.rate : DIGITS.cpi) + '%' });
+      if (p) rows.push({ i: i, label: i === 0 ? tenorLabel(state.tenor) : '物価', text: pointText(p.value, i === 0 ? DIGITS.rate : DIGITS.cpi), value: p.value });
     });
-    if (!ym || !rows.length) return hideTip();
+    if (!ym || !rows.some(function (row) { return row.value !== null; })) return hideTip();
     g.hair.setAttribute('x1', g.X(x)); g.hair.setAttribute('x2', g.X(x));
     g.hair.setAttribute('visibility', 'visible');
     tip.replaceChildren(h('div', 'k-tip-ym', ymText(ym)));
