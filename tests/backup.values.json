@@ -1,0 +1,29 @@
+{
+  "module": "calc.js",
+  "tool": "loan-sim",
+  "data": {
+    "draft": {
+      "mode": "loan",
+      "loan": 3000,
+      "rates": [
+        {
+          "y": 6,
+          "m": 1,
+          "rate": 1.5
+        }
+      ]
+    },
+    "scenarios": [
+      {
+        "id": "a1",
+        "name": "期間短縮",
+        "state": {
+          "loan": 2800
+        }
+      }
+    ]
+  },
+  "required": [
+    "draft"
+  ]
+}
